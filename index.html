@@ -953,7 +953,7 @@
                 if (newX < 0) newX = 0;
                 if (newY < 0) newY = 0;
                 if (newX > maxW) newX = maxW;
-                if (newY > maxH) newX = maxW; // Typo fixed: should be maxH
+                if (newY > maxH) newY = maxH; // Typo fixed: was newX = maxW
                 
                 element.style.left = `${newX}px`;
                 element.style.top = `${newY}px`;
@@ -995,10 +995,10 @@
             scene.add(directionalLight);
 
             // --- 3D Model Loader (Black Hole) ---
-            const loader = new GLTFLoader();
+            const loader = new GLTGLoader();
             // --- Corrected path for local host and published site ---
-            // FIX: Use the Git LFS raw media URL
-            const modelUrl = 'https://media.githubusercontent.com/media/itzmedaniel/website/main/black_hole.glb'; 
+            // FIX: Revert to relative path. GitHub Pages will resolve this.
+            const modelUrl = './black_hole.glb'; 
 
             loader.load(modelUrl, (gltf) => {
                 blackHoleModel = gltf.scene;
@@ -1042,8 +1042,8 @@
             // --- 3D Model Loader (Macbook) ---
             const macbookLoader = new GLTFLoader();
             // --- Corrected path for local host and published site ---
-            // FIX: Use the Git LFS raw media URL
-            const macbookModelUrl = 'https://media.githubusercontent.com/media/itzmedaniel/website/main/macbook.glb'; 
+            // FIX: Revert to relative path. GitHub Pages will resolve this.
+            const macbookModelUrl = './macbook.glb'; 
 
             macbookLoader.load(macbookModelUrl, (gltf) => {
                 macbookModel = gltf.scene;
@@ -1186,6 +1186,23 @@
 
 
             // --- Starfield Background ---
+                 // Remove animation instance and its targets
+                 if (headingAnimationInstances[pageId]) {
+                     anime.remove(headingAnimationInstances[pageId].targets);
+                     delete headingAnimationInstances[pageId];
+                 }
+                 
+                 // Restore original text and clean classes
+                 if (heading && heading.originalText) {
+                     heading.innerHTML = heading.originalText; // Restore original text
+                     delete heading.originalText;
+                     heading.classList.remove('split-applied');
+                 }
+            };
+            
+            // Restart animation
+            if (!animationFrameId) {
+                animate();
             }
             // --- Trigger UI animation on returning home ---
              animateUIIn();
@@ -1294,7 +1311,7 @@
 
             // Restore original text
             if (!heading.originalText) {
-                heading.originalText = heading.textContent.trim();
+                heading.originalText = heading.textContent ? heading.textContent.trim() : "";
             } else {
                 heading.innerHTML = heading.originalText;
             }
@@ -1302,7 +1319,7 @@
             
 
             // 2. Split text by character, wrapping with 'clip' (mimicking requested structure)
-            const text = heading.textContent;
+            const text = heading.originalText; // Use stored text
             heading.innerHTML = text.replace(/\S/g, char => {
                 // Use a space for space characters to maintain layout
                 if (char.trim() === '') return ' ';
@@ -1500,6 +1517,7 @@
     </script>
 </body>
 </html>
+
 
 
 
