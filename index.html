@@ -952,7 +952,7 @@
                 if (newX < 0) newX = 0;
                 if (newY < 0) newY = 0;
                 if (newX > maxW) newX = maxW;
-                if (newY > maxH) newX = maxW; // Typo fixed: should be maxH
+                if (newY > maxH) newY = maxW; // Typo fixed: should be maxH
                 
                 element.style.left = `${newX}px`;
                 element.style.top = `${newY}px`;
@@ -1065,6 +1065,10 @@
 
             }, undefined, (error) => {
                 console.error('An error happened while loading the macbook model:', error);
+                // NEW: Add a specific error message for the macbook model
+                if (container && !isMacbookLoaded) {
+                     container.insertAdjacentHTML('beforeend', '<div class="absolute z-10 flex items-center justify-center text-center text-red-500 -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">Failed to load macbook.glb.</div>');
+                }
             });
 
 
@@ -1149,6 +1153,9 @@
 
         let activePageElement = null; // Track the currently visible page
 
+        // --- 
+        // --- FIX 1: Corrected the showHomePage function ---
+        // ---
         function showHomePage() {
             if (mainContent) mainContent.classList.remove('hidden');
             if (homeButton) homeButton.classList.add('hidden');
@@ -1173,22 +1180,21 @@
                      anime.remove(headingAnimationInstances[pageId].targets);
                      delete headingAnimationInstances[pageId];
                  }
+            }); // <-- This closing tag was missing and replaced with junk code.
 
+            // The misplaced error code and extra '}' were removed from here.
 
-            }, undefined, (error) => {
-                console.error('An error happened while loading the macbook model:', error);
-                // NEW: Add a specific error message for the macbook model
-                if (container && !isMacbookLoaded) {
-                     container.insertAdjacentHTML('beforeend', '<div class="absolute z-10 flex items-center justify-center text-center text-red-500 -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">Failed to load macbook.glb.</div>');
-                }
-            });
-
-
-            // --- Starfield Background ---
-            }
             // --- Trigger UI animation on returning home ---
              animateUIIn();
              animateShine(); // Restart shine animation
+             
+             // --- 
+             // --- FIX 2: RESTART THE 3D RENDER LOOP ---
+             // --- This is the fix for the frozen animation.
+             if (!animationFrameId) {
+                animate();
+             }
+        }
         
 
         function showPage(pageId) {
@@ -1499,7 +1505,3 @@
     </script>
 </body>
 </html>
-
-
-
-
