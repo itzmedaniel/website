@@ -964,7 +964,10 @@
                 if (newX < 0) newX = 0;
                 if (newY < 0) newY = 0;
                 if (newX > maxW) newX = maxW;
-                if (newY > maxH) newY = maxW; // Typo fixed: should be maxH
+                
+                // --- THIS IS THE FIX ---
+                // The typo was here. It incorrectly used maxW instead of maxH.
+                if (newY > maxH) newY = maxH; 
                 
                 element.style.left = `${newX}px`;
                 element.style.top = `${newY}px`;
