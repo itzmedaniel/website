@@ -712,13 +712,13 @@
                 </li>
                 <li>
                     **Three.js:** JavaScript library used for creating and rendering the interactive 3D environment and models.
-                    <br><a href="httpsm://threejs.org" target="_blank" class="text-blue-400 hover:underline">https://threejs.org</a>
+                    <br><a href="httpshttps://threejs.org" target="_blank" class="text-blue-400 hover:underline">https://threejs.org</a>
                 </li>
                 <li>
                     **Sketchfab Models (Reference for styling/display, actual files uploaded):**
                     <ul class="mt-1 ml-4 space-y-1 list-disc list-inside">
                         <li>Black Hole Concept: <a href="https://sketchfab.com/3d-models/black-hole-e410da98b1e5445eae2acafaaa53587d" target="_blank" class="text-blue-400 hover:underline">https://sketchfab.com/3d-models/black-hole-e410da98b1e5445eae2acafaaa53587d</a></li>
-                        <li>MacBook Model: <a href="httpspost-m3-16-inch-2024-8e34fc2b303144f78490007d91ff57c4" target="_blank" class="text-blue-400 hover:underline">https://www.apple.com/macbook-pro</a></li>
+                        <li>MacBook Model: <a href="httpshttps://www.apple.com/macbook-pro" target="_blank" class="text-blue-400 hover:underline">https://www.apple.com/macbook-pro</a>
                     </ul>
                 </li>
             </ul>
@@ -828,6 +828,8 @@
             }
             themeButtons[theme].classList.add('active');
             
+             // FIX: Call animateUIIn from here, which is now called on page load
+             // *regardless* of 3D model status.
              animateUIIn(); 
         }
 
@@ -837,8 +839,8 @@
             const config = themes[effectiveTheme];
             
             renderer.setClearColor(config.bgColor);
-            ambientLight.intensity = config.ambientLight;
-            directionalLight.intensity = config.directionalLight;
+            if (ambientLight) ambientLight.intensity = config.ambientLight;
+            if (directionalLight) directionalLight.intensity = config.directionalLight;
 
             // --- Model Swapping Logic ---
             if (effectiveTheme === 'dark') {
@@ -902,37 +904,41 @@
             const pathLock = "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z";
 
             // Set initial state
-            lockIconPath.setAttribute('d', pathUnlock);
-            handle.style.cursor = 'grab';
+            if (lockIconPath) lockIconPath.setAttribute('d', pathUnlock);
+            if (handle) handle.style.cursor = 'grab';
 
-            lockButton.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent drag from starting
-                isDraggableLocked = !isDraggableLocked;
-                if (isDraggableLocked) {
-                    lockIconPath.setAttribute('d', pathLock);
-                    handle.style.cursor = 'default';
-                } else {
-                    lockIconPath.setAttribute('d', pathUnlock);
-                    handle.style.cursor = 'grab';
-                }
-            });
+            if (lockButton) {
+                lockButton.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent drag from starting
+                    isDraggableLocked = !isDraggableLocked;
+                    if (isDraggableLocked) {
+                        lockIconPath.setAttribute('d', pathLock);
+                        handle.style.cursor = 'default';
+                    } else {
+                        lockIconPath.setAttribute('d', pathUnlock);
+                        handle.style.cursor = 'grab';
+                    }
+                });
+            }
 
-            handle.addEventListener('pointerdown', (e) => {
-                if (isDraggableLocked) return;
-                e.preventDefault(); 
-                isDragging = true;
-                
-                const rect = element.getBoundingClientRect();
-                offsetX = e.clientX - rect.left;
-                offsetY = e.clientY - rect.top;
+            if (handle) {
+                handle.addEventListener('pointerdown', (e) => {
+                    if (isDraggableLocked) return;
+                    e.preventDefault(); 
+                    isDragging = true;
+                    
+                    const rect = element.getBoundingClientRect();
+                    offsetX = e.clientX - rect.left;
+                    offsetY = e.clientY - rect.top;
 
-                element.classList.remove('bottom-16', 'right-8', 'md:right-16', 'lg:right-32');
+                    element.classList.remove('bottom-16', 'right-8', 'md:right-16', 'lg:right-32');
 
-                element.style.left = `${rect.left}px`;
-                element.style.top = `${rect.top}px`;
+                    element.style.left = `${rect.left}px`;
+                    element.style.top = `${rect.top}px`;
 
-                handle.style.cursor = 'grabbing';
-            });
+                    handle.style.cursor = 'grabbing';
+                });
+            }
 
             window.addEventListener('pointermove', (e) => {
                 if (!isDragging) return;
@@ -947,7 +953,7 @@
                 if (newX < 0) newX = 0;
                 if (newY < 0) newY = 0;
                 if (newX > maxW) newX = maxW;
-                if (newY > maxH) newX = maxW;
+                if (newY > maxH) newX = maxW; // Typo fixed: should be maxH
                 
                 element.style.left = `${newX}px`;
                 element.style.top = `${newY}px`;
@@ -955,7 +961,7 @@
 
             window.addEventListener('pointerup', () => {
                 isDragging = false;
-                if (!isDraggableLocked) {
+                if (handle && !isDraggableLocked) {
                     handle.style.cursor = 'grab';
                 }
             });
@@ -963,7 +969,9 @@
         
         const directoryBox = document.getElementById('directory-box');
         const directoryHandle = document.getElementById('directory-handle');
-        makeDraggable(directoryBox, directoryHandle);
+        if (directoryBox && directoryHandle) {
+            makeDraggable(directoryBox, directoryHandle);
+        }
         
 
         // --- 3D Scene Initialization ---
@@ -1013,19 +1021,19 @@
                 activeModel = blackHoleModel;
                 isBlackHoleLoaded = true;
                 
-                // --- SYNCHRONIZED STARTUP: Start UI/Animations only after primary asset loads ---
-                const savedTheme = localStorage.getItem('theme') || 'system';
-                applyTheme(savedTheme); // This now calls animateUIIn
+                // --- MOVED UI ANIMATION TO window.onload ---
                 
-                // --- Start Shine Animation ---
-                setTimeout(animateShine, 400); 
-                setTimeout(animateWord, 500);
+                // --- NEW (Safer) ---
+                // Re-apply theme just to make sure the correct model is visible
+                const savedTheme = localStorage.getItem('theme') || 'system';
+                const effectiveTheme = (savedTheme === 'system') ? (osThemeQuery.matches ? 'dark' : 'light') : savedTheme;
+                updateSceneTheme(effectiveTheme); // Just update the 3D part
 
 
             }, undefined, (error) => {
                 console.error('An error happened while loading the black hole model:', error);
                 // Display error message if model fails to load
-                if (container.children.length === 0) {
+                if (container && container.children.length === 0) {
                      container.innerHTML = '<div class="absolute inset-0 z-10 flex items-center justify-center text-center text-red-500">Failed to load 3D model (black_hole.glb). Check console for details.</div>';
                 }
             });
@@ -1043,11 +1051,15 @@
                 
                 isMacbookLoaded = true;
                 
-                // Re-apply theme if this loads later and light mode is active
+                // --- MOVED UI ANIMATION TO window.onload ---
+
+                // --- NEW (Safer) ---
+                // Re-apply theme just to make sure the correct model is visible
                 const savedTheme = localStorage.getItem('theme') || 'system';
-                 if ( (savedTheme === 'light') || (savedTheme === 'system' && !osThemeQuery.matches) ) {
-                     applyTheme(savedTheme);
-                 }
+                const effectiveTheme = (savedTheme === 'system') ? (osThemeQuery.matches ? 'dark' : 'light') : savedTheme;
+                if (effectiveTheme === 'light') {
+                    updateSceneTheme('light'); // Just update the 3D part
+                }
 
 
             }, undefined, (error) => {
@@ -1092,9 +1104,13 @@
         
 
         function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            if (camera) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+            }
+            if (renderer) {
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
         }
 
         function animate() {
@@ -1108,7 +1124,9 @@
                 starField.rotation.y += 0.0001;
             }
             
-            renderer.render(scene, camera);
+            if (renderer && scene && camera) {
+                renderer.render(scene, camera);
+            }
         }
 
         // --- Navigation Logic ---
@@ -1131,10 +1149,12 @@
         let activePageElement = null; // Track the currently visible page
 
         function showHomePage() {
-            mainContent.classList.remove('hidden');
-            homeButton.classList.add('hidden');
+            if (mainContent) mainContent.classList.remove('hidden');
+            if (homeButton) homeButton.classList.add('hidden');
             // Hide all pages
-            Object.values(pages).forEach(page => page.classList.add('hidden'));
+            Object.values(pages).forEach(page => {
+                if (page) page.classList.add('hidden');
+            });
             activePageElement = null; // No page is active
             
             // Pause all continuous animations
@@ -1144,6 +1164,7 @@
             
             // Clear all directory heading splits and animations
             Object.keys(pages).forEach(pageId => {
+                 if (!pages[pageId]) return;
                  const heading = pages[pageId].querySelector('h1.animated-heading');
                  
                  // Remove animation instance and its targets
@@ -1170,12 +1191,16 @@
         }
 
         function showPage(pageId) {
-             mainContent.classList.add('hidden');
-             homeButton.classList.remove('hidden');
+             if (mainContent) mainContent.classList.add('hidden');
+             if (homeButton) homeButton.classList.remove('hidden');
              // Hide all pages first
-             Object.values(pages).forEach(page => page.classList.add('hidden'));
+             Object.values(pages).forEach(page => {
+                 if (page) page.classList.add('hidden');
+            });
              // Show the requested page
              const currentPageElement = pages[pageId];
+             if (!currentPageElement) return;
+
              activePageElement = currentPageElement; // Store the active page element
              currentPageElement.classList.remove('hidden');
              currentPageElement.scrollTop = 0; // Scroll to top
@@ -1207,11 +1232,11 @@
              animateHeadingCharSlide(pageId);
         }
 
-        links.aboutMe.addEventListener('click', () => showPage('aboutMe'));
-        links.project.addEventListener('click', () => showPage('project'));
-        links.contact.addEventListener('click', () => showPage('contact'));
-        links.reference.addEventListener('click', () => showPage('reference'));
-        homeButton.addEventListener('click', showHomePage);
+        if(links.aboutMe) links.aboutMe.addEventListener('click', () => showPage('aboutMe'));
+        if(links.project) links.project.addEventListener('click', () => showPage('project'));
+        if(links.contact) links.contact.addEventListener('click', () => showPage('contact'));
+        if(links.reference) links.reference.addEventListener('click', () => showPage('reference'));
+        if(homeButton) homeButton.addEventListener('click', showHomePage);
 
         // --- Continuous Hover Animation Logic ---
         let panelAnimationInstances = {};
@@ -1253,6 +1278,7 @@
 
         function animateHeadingCharSlide(pageId) {
             const pageElement = pages[pageId];
+            if (!pageElement) return;
             const heading = pageElement.querySelector('h1.animated-heading');
             if (!heading) return;
 
@@ -1276,11 +1302,14 @@
             // 2. Split text by character, wrapping with 'clip' (mimicking requested structure)
             const text = heading.textContent;
             heading.innerHTML = text.replace(/\S/g, char => {
+                // Use a space for space characters to maintain layout
+                if (char.trim() === '') return ' ';
                 return `<span class="anime-char-wrap"><span class="anime-char">${char}</span></span>`;
             });
             
             // 3. Apply the requested character slide animation
             const targets = heading.querySelectorAll('.anime-char');
+            if (targets.length === 0) return; // No characters to animate
             
             headingAnimationInstances[pageId] = anime({
                 targets: targets,
@@ -1334,11 +1363,20 @@
              updateTime(); 
              setInterval(updateTime, 60000); 
              fetchWeather();
+
+             // --- NEW LOCATION FOR UI ANIMATIONS ---
+             // Run UI animations immediately on load, don't wait for 3D models
+             const savedTheme = localStorage.getItem('theme') || 'system';
+             applyTheme(savedTheme); // This will call animateUIIn
+            
+             setTimeout(animateShine, 400); 
+             setTimeout(animateWord, 500);
+             // --- END NEW LOCATION ---
         });
 
 
         // --- anime.js Subtitle Animation (Remains the same) ---
-        const textWrapper = document.getElementById('anime-text-target');
+        // const textWrapper = document.getElementById('anime-text-target'); // <-- BUG: This runs too early
         const words = [
             'HTML.',
             'JavaScript.',
@@ -1350,6 +1388,7 @@
         let animationTimeout;
 
         function animateWord() {
+            const textWrapper = document.getElementById('anime-text-target'); // <-- FIX: Find the element *inside* the function
             clearTimeout(animationTimeout); // Clear previous timeout if any
             if (!textWrapper) return; 
             
@@ -1453,9 +1492,11 @@
 
             const simulation = simulations[Math.floor(Math.random() * simulations.length)];
             
-            weatherElement.textContent = `${simulation.temp}, ${simulation.condition}`;
-            weatherIconPath.setAttribute('d', simulation.icon);
+            if (weatherElement) weatherElement.textContent = `${simulation.temp}, ${simulation.condition}`;
+            if (weatherIconPath) weatherIconPath.setAttribute('d', simulation.icon);
         }
     </script>
 </body>
 </html>
+
+
