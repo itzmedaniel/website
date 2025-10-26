@@ -502,7 +502,7 @@
                 <div id="weather-info" class="info-item">
                      <!-- Weather Icon Placeholder SVG (Sun) -->
                      <!-- Added explicit width/height classes for display robustness -->
-                     <svg id="weather-icon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                     <svg id="weather-icon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-6.364-.386 1.591-1.591M3 12h2.25m.386-6.364 1.591 1.591" />
                     </svg>
                     <span id="current-weather">Loading...</span>
@@ -1401,7 +1401,7 @@
             'JavaScript.',
             'anime.js.',
             'Three.js.',
-            'and Tailwind CSS.'
+            'Tailwind CSS.' /* <-- FIXED: Removed "and" */
         ];
         let wordIndex = 0;
         let animationTimeout;
@@ -1481,10 +1481,10 @@
         // --- Weather Fetch Logic (Stable Localized Simulation) ---
         
         const weatherIcons = {
-            sunny: "M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-6.364-.386 1.591-1.591M3 12h2.25m.386-6.364 1.591 1.591",
-            cloudy: "M2.25 15a4.5 4.5 0 0 1 4.5-4.5h8.25a4.5 4.5 0 0 1 4.5 4.5v0a4.5 4.5 0 0 1-4.5 4.5h-8.25a4.5 4.5 0 0 1-4.5-4.5v0Z M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z",
-            rainy: "M9 12.75l.386.214a.75.75 0 0 1-.772 0l.386-.214ZM12 14.25l.386.214a.75.75 0 0 1-.772 0l.386-.214ZM15 12.75l.386.214a.75.75 0 0 1-.772 0l.386-.214ZM10.5 15.75h3 M8.25 17.25h7.5 M6 18.75h12 M4.5 10.5a7.5 7.5 0 0 1 15 0v.667a9.75 9.75 0 0 1-1.5 5.083 9.75 9.75 0 0 1-12 0A9.75 9.75 0 0 1 4.5 11.167V10.5Z", 
-            thunder: "M11.25 4.5l7.5 7.5-7.5 7.5 M6.75 20.25h10.5a2.25 2.25 0 0 0 2.25-2.25V6a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6v12a2.25 2.25 0 0 0 2.25 2.25Z" 
+            sunny: "M12 18a6 6 0 100-12 6 6 0 000 12zM12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41",
+            cloudy: "M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z",
+            rainy: "M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10zM16 14v1M12 16v1M8 14v1", 
+            thunder: "M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10zM13 11l-4 6h3l-1 4" 
         };
 
         function getWeatherIcon(conditionText) {
@@ -1517,3 +1517,4 @@
     </script>
 </body>
 </html>
+
