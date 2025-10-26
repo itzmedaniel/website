@@ -730,7 +730,7 @@
     </div>
 
 
-    <!-- Main 3D Logic -->
+        <!-- Main 3D Logic -->
     <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -997,7 +997,8 @@
             // --- 3D Model Loader (Black Hole) ---
             const loader = new GLTFLoader();
             // --- Corrected path for local host and published site ---
-            const modelUrl = './black_hole.glb'; 
+            // FIX: Use the Git LFS raw media URL
+            const modelUrl = 'https://media.githubusercontent.com/media/itzmedaniel/website/main/black_hole.glb'; 
 
             loader.load(modelUrl, (gltf) => {
                 blackHoleModel = gltf.scene;
@@ -1041,7 +1042,8 @@
             // --- 3D Model Loader (Macbook) ---
             const macbookLoader = new GLTFLoader();
             // --- Corrected path for local host and published site ---
-            const macbookModelUrl = './macbook.glb'; 
+            // FIX: Use the Git LFS raw media URL
+            const macbookModelUrl = 'https://media.githubusercontent.com/media/itzmedaniel/website/main/macbook.glb'; 
 
             macbookLoader.load(macbookModelUrl, (gltf) => {
                 macbookModel = gltf.scene;
@@ -1172,23 +1174,23 @@
                      anime.remove(headingAnimationInstances[pageId].targets);
                      delete headingAnimationInstances[pageId];
                  }
-                 
-                 // Restore original text and clean classes
-                 if (heading && heading.originalText) {
-                     heading.innerHTML = heading.originalText; // Restore original text
-                     delete heading.originalText;
-                     heading.classList.remove('split-applied');
-                 }
+
+
+            }, undefined, (error) => {
+                console.error('An error happened while loading the macbook model:', error);
+                // NEW: Add a specific error message for the macbook model
+                if (container && !isMacbookLoaded) {
+                     container.insertAdjacentHTML('beforeend', '<div class="absolute z-10 flex items-center justify-center text-center text-red-500 -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">Failed to load macbook.glb.</div>');
+                }
             });
-            
-            // Restart animation
-            if (!animationFrameId) {
-                animate();
+
+
+            // --- Starfield Background ---
             }
             // --- Trigger UI animation on returning home ---
              animateUIIn();
              animateShine(); // Restart shine animation
-        }
+        
 
         function showPage(pageId) {
              if (mainContent) mainContent.classList.add('hidden');
@@ -1498,5 +1500,7 @@
     </script>
 </body>
 </html>
+
+
 
 
