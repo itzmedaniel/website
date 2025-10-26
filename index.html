@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<!-- The class="dark" will be added/removed by JS -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daniel's Project</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
+      }
+    }
+    </script>
+    
+    <!-- Restored global anime.js script include -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Default to light mode colors */
+            background-color: #f3f4f6; /* Light gray background */
+            color: #111827; /* Dark text */
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        /* Dark mode styles */
+        .dark body {
+            background-color: #000000; /* Black "space" background */
+            color: #f0f0f0; 
+        }
+
+        /* Specific text color overrides for themes */
+        .text-container {
+            color: #111827; /* Dark text for light mode */
+        }
+        .dark .text-container {
+            color: #f0f0f0; /* Light text for dark mode */
+        }
+
+        .legend-box {
+            /* Light mode */
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s, opacity 0.3s, transform 0.3s; /* Added transform/opacity for bounce */
+            /* Set position to absolute to allow dragging */
+            position: absolute; 
+            /* z-index is set in-line */
+            opacity: 0; /* Start hidden for animation */
+            border-radius: 0.75rem; /* Keep this rounded */
+        }
+        
+        /* Dark mode */
+        .dark .legend-box {
+            background-color: #333333;
+            border: 1px solid #4b5563;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Light mode link hover */
+        .nav-link:hover {
+             background-color: #f3f4f6; /* Light gray hover */
+        }
+        
+        /* Dark mode link hover */
+        .dark .nav-link:hover {
+            background-color: #4b5563; /* Darker gray hover */
+        }
+
+        /* Theme toggle button styling */
+        .theme-btn {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        /* Light mode toggle */
+        .theme-btn {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+        .theme-btn.active {
+            background-color: #60a5fa; /* Blue */
+            color: #ffffff;
+            border-color: #3b82f6;
+        }
+        
+        /* Dark mode toggle */
+        .dark .theme-btn.active {
+            background-color: #60a5fa; /* Blue */
+            color: #ffffff;
+            border-color: #3b82f6;
+        }
+
+        /* Fullscreen canvas container */
+        .graphic-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10; /* Behind UI */
+            cursor: grab;
+        }
+        .graphic-container:grabbing {
+            cursor: grabbing;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+        }
+        ::-webkit-scrollbar {
+            /* Allow scrollbar for pages */
+             width: 8px;
+        }
+         ::-webkit-scrollbar-track {
+            background: transparent; /* Make track invisible */
+        }
+         ::-webkit-scrollbar-thumb {
+            background: #888; 
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #555;
+        }
+
+
+        canvas {
+            touch-action: manipulation;
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Styles for subtitle letter animation */
+        #anime-text-target {
+            display: inline-block; /* Needed for transforms */
+            white-space: nowrap; /* Prevent line breaks during animation */
+            font-weight: bold;
+        }
+        #anime-text-target .letter {
+            display: inline-block;
+            opacity: 0; /* Start invisible */
+            transform: translateY(10px); /* Start slightly down */
+        }
+        
+        /* Styles for Page Content and Home Button */
+        .page-content {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 15; /* Above canvas, below Directory */
+            /* Adjusted padding for glass panel alignment */
+            padding: 8rem 2rem 2rem 2rem; /* Increased top padding */
+            overflow-y: auto; /* Enable scrolling */
+             /* Background is now mostly for fallback or non-blur browsers */
+             background-color: #f3f4f6; /* Light gray background */
+             color: #111827; 
+             transition: background-color 0.3s, color 0.3s;
+        }
+        .dark .page-content {
+             background-color: #000000; /* Dark background */
+             color: #f0f0f0; 
+        }
+
+        .home-button {
+            position: fixed;
+            top: 1.5rem; 
+            left: 1.5rem; 
+            z-index: 30; 
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            background-color: #d1d5db; 
+            color: #374151; 
+        }
+        .home-button:hover {
+            background-color: #9ca3af; 
+        }
+        .dark .home-button {
+             background-color: #4b5563; 
+             color: #e5e7eb; 
+        }
+        .dark .home-button:hover {
+            background-color: #6b7280; 
+        }
+        .hidden {
+            display: none;
+        }
+
+        /* Styles for timezone/weather info */
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem; /* space-x-2 */
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 500; /* font-medium */
+            margin-top: 0.5rem; /* mt-2 */
+        }
+        .info-item svg {
+             width: 1rem; /* w-4 */
+             height: 1rem; /* h-4 */
+             opacity: 0.7;
+        }
+        /* Smaller font for additional timezones */
+        .timezone-grid {
+             display: grid;
+             grid-template-columns: auto 1fr;
+             gap: 0.25rem 0.5rem;
+             margin-top: 0.75rem; /* mt-3 */
+             font-size: 0.75rem; /* text-xs */
+             opacity: 0.8;
+        }
+
+        /* --- START: FRONT PAGE CHROME METALLIC SHINE EFFECT (ULTRA SHARP CHROME) --- */
+        #animated-title {
+            white-space: nowrap;
+            color: #111827; 
+            
+            /* Apply ULTRA SHARP Chrome Text Styling (Light Mode) */
+            background: linear-gradient(
+                90deg, 
+                #111827 0%, 
+                #000000 3%,    /* Deep Shadow */
+                #ffffff 8%,    /* SHARP Highlight */
+                #000000 13%,   /* Thin Shadow Line */
+                #cccccc 25%,   /* Mid Gray */
+                #ffffff 45%,   /* Center Highlight */
+                #000000 55%,   /* Mid Shadow */
+                #ffffff 70%,   /* Secondary Highlight */
+                #333333 80%,   /* Final Shadow */
+                #111827 100% 
+            );
+            background-size: 400% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-position-x: 100%; 
+            transition: color 0.3s;
+        }
+
+        .dark #animated-title {
+            color: #f0f0f0; 
+            background: linear-gradient(
+                90deg, 
+                #f0f0f0 0%, 
+                #cccccc 3%,    /* Soft Highlight */
+                #000000 8%,    /* SHARP Shadow */
+                #333333 13%,   /* Mid Shadow Line */
+                #777777 25%,   /* Mid Gray */
+                #f0f0f0 45%,   /* Center Highlight */
+                #000000 55%,   /* Sharp Shadow */
+                #cccccc 70%,   /* Secondary Highlight */
+                #333333 80%,   /* Final Shadow */
+                #f0f0f0 100% 
+            );
+            background-size: 400% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-position-x: 100%; 
+        }
+        /* --- END: FRONT PAGE CHROME METALLIC SHINE EFFECT --- */
+
+
+        /* --- START: DIRECTORY HEADING CHARACTER SLIDE ANIMATION STYLES --- */
+        .animated-heading {
+             display: block; 
+             overflow: hidden; /* CRITICAL: Clips the sliding characters */
+             white-space: nowrap; 
+             color: inherit; /* Default solid text color fallback/reference */
+        }
+        /* Wraps the individual character to enforce the clip boundary */
+        .animated-heading .anime-char-wrap {
+            display: inline-block;
+            overflow: hidden;
+            vertical-align: top; 
+        }
+        /* The inner element that does the actual translation */
+        .animated-heading .anime-char {
+            display: inline-block;
+            transform: translateY(100%); /* Starting position set by JS animation */
+        }
+        /* --- END: DIRECTORY HEADING CHARACTER SLIDE ANIMATION STYLES --- */
+
+
+        /* UPDATED: Futuristic Glass Panel Styles (Opaque Inner) */
+        .glass-panel {
+             padding: 2rem; /* p-8 */
+             border-radius: 0.75rem; /* rounded-xl */
+             margin-bottom: 2rem; 
+             position: relative; 
+             transform-style: preserve-3d; /* Enable 3D transforms */
+             transform-origin: center center; /* Center transform origin */
+             /* Light Mode */
+             background: rgba(255, 255, 255, 0.8); 
+             backdrop-filter: blur(12px) saturate(180%);
+             -webkit-backdrop-filter: blur(12px) saturate(180%);
+             
+             /* Glow and Border (translucent blue/dark outline) */
+             box-shadow: 
+                 0 0 15px 3px rgba(59, 130, 246, 0.4), /* Outer glow */
+                 inset 0 0 0 1px rgba(59, 130, 246, 0.3); /* Inner blue outline */
+             border: 1px solid rgba(59, 130, 246, 0.2); /* Faint blue border */
+             
+             /* Initial hidden state for entrance animation */
+             opacity: 0;
+        }
+         /* Dark Mode */
+        .dark .glass-panel {
+            background: rgba(17, 24, 39, 0.75); 
+            backdrop-filter: blur(12px) saturate(180%);
+             -webkit-backdrop-filter: blur(12px) saturate(180%);
+            
+            /* Glow and Border (translucent light blue/white outline) */
+            box-shadow: 
+                0 0 20px 5px rgba(96, 165, 250, 0.5), /* Outer glow */
+                inset 0 0 0 1px rgba(96, 165, 250, 0.4); /* Inner light outline */
+            border: 1px solid rgba(96, 165, 250, 0.3); 
+        }
+        
+        /* Footer style */
+        .copyright-footer {
+             font-size: 0.75rem;
+             opacity: 0.6;
+             text-align: center;
+             margin-top: 1rem;
+             margin-bottom: 1rem;
+        }
+
+        /* Bouncing Orb Style */
+        .bouncing-orb {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            z-index: -1; /* Place it behind the glass panel */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.2; /* Softer opacity */
+            filter: blur(100px); /* Massive blur for soft glow */
+            
+            /* Dynamic color gradient */
+            background: linear-gradient(135deg, #a78bfa 0%, #3b82f6 100%); /* Purple/Blue */
+        }
+
+        .dark .bouncing-orb {
+            background: linear-gradient(135deg, #818cf8 0%, #34d399 100%); /* Lighter purple/green */
+        }
+
+        /* Form styling */
+        .contact-input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #111827;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+        .contact-input:focus {
+            outline: none;
+            border-color: #3b82f6; /* Blue focus ring */
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .dark .contact-input {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background-color: rgba(0, 0, 0, 0.4);
+            color: #f0f0f0;
+        }
+        .dark .contact-input:focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3);
+        }
+
+        .social-icon-link {
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: transform 0.2s, background-color 0.2s;
+            /* Light mode base */
+            background-color: #e5e7eb;
+            color: #111827;
+        }
+        .social-icon-link:hover {
+            transform: scale(1.1);
+            background-color: #d1d5db;
+        }
+
+        .dark .social-icon-link {
+            background-color: #374151;
+            color: #f0f0f0;
+        }
+        .dark .social-icon-link:hover {
+            background-color: #4b5563;
+        }
+
+        /* NEW: Class for animating H1 letters */
+        .animated-h1-letter {
+            display: inline-block;
+        }
+
+        /* NEW: Project item styling */
+        .project-item {
+            padding: 1.25rem; /* p-5 */
+            border-radius: 0.75rem; /* rounded-xl */
+            transition: background-color 0.3s, border-color 0.3s;
+            
+            /* Light mode */
+            background-color: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .dark .project-item {
+            /* Dark mode */
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .project-item h3 {
+             font-size: 1.25rem; /* text-xl */
+             font-weight: 600; /* font-semibold */
+             margin-bottom: 0.5rem; /* mb-2 */
+        }
+
+
+    </style>
+</head>
+<!-- Removed padding from body -->
+<body class="min-h-screen overflow-hidden">
+
+    <!-- Home Button (initially hidden) -->
+    <button id="home-button" class="hidden home-button" title="Back to Home">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+    </button>
+
+    <!-- Main Content Wrapper -->
+    <div id="main-content">
+        <!-- TOP LEFT TEXT SECTION -->
+        <div id="top-left-ui" class="absolute z-20 text-container top-16 left-8 md:left-16 lg:left-32">
+            <!-- The ID remains for animation targeting -->
+            <h1 id="animated-title" class="max-w-sm text-4xl font-extrabold leading-tight tracking-tight md:text-5xl">
+                Daniel's Project
+            </h1>
+            <!-- RESTORED span to subtitle -->
+            <p class="max-w-xs mt-4 text-lg font-medium">
+                Still a beginner at coding, this project consists of 
+                <span id="anime-text-target" class="font-bold"></span> 
+            </p>
+            <!-- Timezone and Weather Info -->
+            <div class="mt-4"> 
+                <div id="timezone-info" class="info-item">
+                    <!-- Clock Icon SVG -->
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <span id="current-time">Loading time...</span> 
+                    <span class="font-semibold">MYT</span>
+                </div>
+                <div id="weather-info" class="info-item">
+                     <!-- Weather Icon Placeholder SVG (Sun) -->
+                     <!-- Added explicit width/height classes for display robustness -->
+                     <svg id="weather-icon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-6.364-.386 1.591-1.591M3 12h2.25m.386-6.364 1.591 1.591" />
+                    </svg>
+                    <span id="current-weather">Loading...</span>
+                    <span>(Kuala Lumpur)</span>
+                </div>
+                 <!-- Additional Timezones Grid -->
+                 <div class="timezone-grid">
+                    <span>UTC:</span> <span id="utc-time">...</span>
+                    <span>EST:</span> <span id="est-time">...</span>
+                    <span>PST:</span> <span id="pst-time">...</span>
+                    <span>CET:</span> <span id="cet-time">...</span>
+                 </div>
+            </div>
+        </div>
+
+        <!-- MAIN GRAPHIC CONTAINER -->
+        <div class="graphic-container" id="canvas-container">
+            <!-- The 3D canvas will be inserted here by Three.js -->
+        </div>
+
+        <!-- NAVIGATION BOX (BOTTOM RIGHT) -->
+        <div id="directory-box" class="absolute z-20 w-64 p-4 rounded-lg text-container legend-box bottom-16 right-8 md:right-16 lg:right-32">
+            <h2 id="directory-handle" class="flex items-center justify-between mb-3 text-sm font-bold cursor-grab active:cursor-grabbing">
+                <span>Directory</span>
+                <button id="drag-lock-btn" class="p-1 text-gray-500 rounded-full dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600" title="Toggle drag lock">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path id="lock-icon-path" stroke-linecap="round" stroke-linejoin="round" d="M18 9V7a4 4 0 00-8 0v2m8 0H6a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2v-6a2 2 0 00-2-2z"></path>
+                    </svg>
+                </button>
+            </h2>
+
+            <!-- Links -->
+            <div class="flex flex-col space-y-2">
+                <button id="about-me-link" class="flex items-center p-2 text-lg font-semibold text-left transition-colors rounded-md nav-link">
+                    <span class="w-2 h-2 mr-3 bg-blue-500 rounded-full dot"></span>
+                    About Me
+                </button>
+                <button id="project-link" class="flex items-center p-2 text-lg font-semibold text-left transition-colors rounded-md nav-link">
+                    <span class="w-2 h-2 mr-3 bg-orange-500 rounded-full dot"></span>
+                    Project
+                </button>
+                <button id="contact-link" class="flex items-center p-2 text-lg font-semibold text-left transition-colors rounded-md nav-link">
+                    <span class="w-2 h-2 mr-3 bg-green-500 rounded-full dot"></span>
+                    Contact
+                </button>
+                <button id="reference-link" class="flex items-center p-2 text-lg font-semibold text-left transition-colors rounded-md nav-link">
+                    <span class="w-2 h-2 mr-3 bg-purple-500 rounded-full dot"></span>
+                    Reference
+                </button>
+            </div>
+
+            <!-- THEME TOGGLE -->
+            <div class="pt-3 mt-3 border-t border-gray-200 dark:border-gray-600">
+                <h3 class="mb-2 text-sm font-bold">Theme</h3>
+                <div class="flex justify-between space-x-1">
+                    <button id="theme-light" class="theme-btn">Light</button>
+                    <button id="theme-dark" class="theme-btn">Dark</button>
+                    <button id="theme-system" class="theme-btn">System</button>
+                </div>
+            </div>
+        </div>
+        <!-- NEW: Copyright Footer for Main Page -->
+        <div class="absolute inset-x-0 bottom-0 z-20 copyright-footer text-container">
+            &copy; 2025 Daniel's Project. All rights reserved.
+        </div>
+    </div> <!-- End of main-content -->
+
+    <!-- About Me Page Content (initially hidden) -->
+    <div id="about-me-page" class="hidden page-content text-container">
+        <!-- Width class max-w-6xl -->
+        <div class="bouncing-orb" id="orb-aboutMe"></div> 
+        <div class="max-w-6xl mx-auto glass-panel"> 
+            <h1 class="mb-6 text-4xl font-bold text-center animated-heading md:text-5xl">About Me</h1>
+            <p class="mb-4 text-lg">
+                Hello! I'm Daniel Long, i am currently a college student developing and improving my portfolio. 
+            </p>
+             <p class="mb-10 text-lg">
+                This section is dedicated to my biography, skills, and professional journey. I aim to continuously improve my skills in web development, design, and 3D visualization.
+            </p>
+             <p class="mt-10 text-lg">More content...</p>
+             <p class="mt-10 text-lg" style="min-height: 50vh;">More content to make it scroll slightly...</p> 
+             <p class="mt-10 text-lg">Bottom of the About Me section.</p>
+             <!-- NEW: Copyright Footer -->
+             <div class="copyright-footer">
+                &copy; 2025 Daniel's Project. All rights reserved.
+             </div>
+        </div>
+    </div>
+
+    <!-- Project Page Content (initially hidden) -->
+    <div id="project-page" class="hidden page-content text-container">
+         <!-- Width class max-w-6xl -->
+         <div class="bouncing-orb" id="orb-project"></div> 
+         <div class="max-w-6xl mx-auto glass-panel"> 
+             <!-- ADDED CLASS: animated-heading -->
+            <h1 class="mb-6 text-4xl font-bold text-center animated-heading md:text-5xl">Project</h1>
+            <p class="mb-10 text-lg">
+                There are no current project that i am working in right now, but you can refer to my github for my old projects
+            </p>
+            
+            <!-- START: Project List -->
+            <ul class="mt-8 space-y-6">
+                
+                <!-- Project 1: AI Model -->
+                <li class="project-item">
+                    <h3>Diabetes Risk AI Model</h3>
+                    <p>
+                        I made one of a basic not medically accurate diabetes risk ai model to calculate the risk of the patient. [I used linux OS or linux mint to develop this with the help of AI] (<a href="https://diabetes1-qvsdmydtrriixdicnfnzoj.streamlit.app/" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">https://diabetes1-qvsdmydtrriixdicnfnzoj.streamlit.app/</a>)
+                    </p>
+                </li>
+                
+                <!-- Placeholder for future projects -->
+                <li class="project-item opacity-70">
+                    <h3>Future Project</h3>
+                    <p>
+                        More projects will be added here soon.
+                    </p>
+                </li>
+            
+            </ul>
+            <!-- END: Project List -->
+
+             <!-- NOTE: The 'More project content...' ensures the main page scrollbar appears for the entire page content, as requested. -->
+             <p class="mt-10 text-lg" style="min-height: 50vh;">Additional project content here to ensure the main page scrolls...</p> 
+             <p class="mt-10 text-lg">End of Project page.</p>
+             <!-- NEW: Copyright Footer -->
+             <div class="copyright-footer">
+                &copy; 2025 Daniel's Project. All rights reserved.
+             </div>
+        </div>
+    </div>
+
+    <!-- Contact Page Content (initially hidden) -->
+    <div id="contact-page" class="hidden page-content text-container">
+        <!-- Width class max-w-6xl -->
+        <div class="bouncing-orb" id="orb-contact"></div> 
+        <div class="max-w-6xl mx-auto glass-panel"> 
+            <!-- ADDED CLASS: animated-heading -->
+            <h1 class="mb-6 text-4xl font-bold text-center animated-heading md:text-5xl">Contact</h1>
+            
+            <div class="flex flex-col space-y-6">
+                <!-- Social Icons -->
+                <div class="flex justify-center py-4 space-x-6 border-t border-b border-gray-200 dark:border-gray-600">
+                    
+                    <a href="https://www.linkedin.com/in/daniel-long-49ab9a33a?" target="_blank" class="social-icon-link" title="LinkedIn">
+                        <!-- Updated LinkedIn Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.136-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.671 7 3.336v5.9z"/></svg>
+                    </a>
+                    
+                    <a href="https://www.instagram.com/grapejuicelemonade" target="_blank" class="social-icon-link" title="Instagram">
+                        <!-- Updated Instagram Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.851.07 3.251.157 4.79 1.745 4.945 5.045.059 1.267.07 1.646.07 4.851s-.011 3.583-.07 4.851c-.157 3.298-1.744 4.887-5.045 4.944-1.267.059-1.646.07-4.851.07s-3.583-.011-4.851-.07c-3.299-.157-4.887-1.744-4.945-5.044-.059-1.267-.07-1.646-.07-4.851s.011-3.583.07-4.851c.157-3.251 1.744-4.79 5.044-4.945 1.268-.059 1.646-.07 4.851-.07zm0-2.163c-3.259 0-3.667.014-4.946.072-4.354.209-6.09 1.956-6.299 6.304-.058 1.279-.072 1.686-.072 4.947 0 3.26.014 3.667.072 4.946.208 4.348 1.945 6.089 6.299 6.298 1.279.058 1.686.072 4.946.072s3.667-.014 4.947-.072c4.354-.209 6.091-1.956 6.299-6.304.058-1.279.072 1.686.072-4.947s-.014-3.668-.072-4.946c-.209-4.348-1.945-6.089-6.299-6.298-1.279-.058-1.686-.072-4.946-.072zm0 5.838c-3.473 0-6.29 2.817-6.29 6.29s2.817 6.29 6.29 6.29 6.29-2.817 6.29-6.29-2.817-6.29-6.29-6.29zm0 10.373c-2.253 0-4.084-1.831-4.084-4.083s1.831-4.083 4.084-4.083 4.084 1.831 4.084 4.083-1.831 4.083-4.084 4.083zm7.042-14.774c0 1.277-1.034 2.31-2.31 2.31s-2.31-1.033-2.31-2.31c0-1.276 1.034-2.31 2.31-2.31s2.31 1.034 2.31 2.31z"/></svg>
+                    </a>
+                    
+                    <a href="mailto:daniellong1109@gmail.com" target="_blank" class="social-icon-link" title="Gmail">
+                        <!-- Updated Gmail Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M0 4v16h24v-16h-24zm19.646 1.354l-7.646 6.646-7.646-6.646h15.292zm-15.292 14.292v-10.49l7.646 6.646 7.646-6.646v10.49h-15.292z"/></svg>
+                    </a>
+
+                     <a href="https://github.com/itzmedaniel" target="_blank" class="social-icon-link" title="GitHub">
+                         <!-- Updated GitHub Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.374-12 12 0 5.302 3.438 9.8 8.207 11.387.6.11.82-.26.82-.577v-2.09c-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.332-1.756-1.332-1.756-1.089-.745.083-.73.083-.73 1.205.085 1.838 1.233 1.838 1.233 1.065 1.837 2.809 1.305 3.495.998.108-.778.417-1.305.762-1.604-2.665-.304-5.466-1.333-5.466-5.93 0-1.31.464-2.383 1.234-3.221-.124-.304-.535-1.527.117-3.176 0 0 1.008-.322 3.301 1.23a11.396 11.396 0 0 1 2.502-.337c.831-.059 1.66-.059 2.502.337 2.292-1.552 3.3-1.23 3.3-1.157 1.353 1.649.242 2.872.118 3.176.77.838 1.234 1.911 1.234 3.221 0 4.59-2.805 5.62-5.478 5.92-.413.359-.817 1.082-.817 2.182v3.235c0 .318.219.687.823.575C20.56 21.802 24 17.301 24 12c0-6.626-5.374-12-12-12z"/></svg>
+                    </a>
+                </div>
+
+                <!-- Contact Form -->
+                <form action="https://formspree.io/f/meopqwan" method="POST" class="pt-4 space-y-4">
+                    
+                    <input type="email" name="_replyto" placeholder="Your Email" class="contact-input" required>
+                    <textarea name="message" placeholder="Your Message" rows="5" class="resize-none contact-input" required></textarea>
+                    
+                    <button type="submit" class="w-full py-2 font-semibold text-white transition-colors duration-200 bg-blue-600 rounded-lg hover:bg-blue-700">
+                        Send Message
+                    </button>
+                </form>
+            </div>
+            
+            <!-- NEW: Copyright Footer -->
+             <div class="copyright-footer">
+                &copy; 2025 Daniel's Project. All rights reserved.
+             </div>
+        </div>
+    </div>
+
+    <!-- Reference Page Content (initially hidden) -->
+    <div id="reference-page" class="hidden page-content text-container">
+        <!-- Width class max-w-6xl -->
+        <div class="bouncing-orb" id="orb-reference"></div> 
+         <div class="max-w-6xl mx-auto glass-panel"> 
+            <h1 class="mb-6 text-4xl font-bold text-center animated-heading md:text-5xl">Reference</h1>
+            <p class="mb-10 text-lg">
+                The content and assets used in this project are referenced below to ensure proper attribution and prevent plagiarism.
+            </p>
+            <h2 class="mb-4 text-2xl font-bold">Model References (3D Assets)</h2>
+            <ul class="mb-8 ml-4 space-y-2 list-disc list-inside">
+                <li>
+                    **Black Hole:** Uploaded by User (Source: Unknown, used with permission for personal project display).
+                    <br><small class="opacity-70">Note: External model asset used for visual demonstration only.</small>
+                </li>
+                <li>
+                    **MacBook:** Uploaded by User (Source: Unknown, used withpermission for personal project display).
+                    <br><small class="opacity-70">Note: External model asset used for visual demonstration only.</small>
+                </li>
+            </ul>
+
+            <h2 class="mb-4 text-2xl font-bold">Design & Technology References</h2>
+            <ul class="mb-8 ml-4 space-y-2 list-disc list-inside">
+                <li>
+                    **AI Development Assistance:** This website's animations, UI structure, and complex logic were written with the assistance of a large language model (LLM), which acted as a development partner.
+                    <br><small class="opacity-70">Acknowledged: Google Gemini</small>
+                </li>
+                <li>
+                    **Apple Website Design:** Inspiration for the overall aesthetic, especially the glassy, translucent UI elements.
+                    <br><a href="https://www.apple.com/macbook-pro" target="_blank" class="text-blue-400 hover:underline">https://www.apple.com/macbook-pro</a>
+                </li>
+                <li>
+                    **Anime.js Library:** Used for all custom page transitions, continuous hover effects, and text animations.
+                    <br><a href="https://animejs.com" target="_blank" class="text-blue-400 hover:underline">https://animejs.com</a>
+                </li>
+                <li>
+                    **Three.js:** JavaScript library used for creating and rendering the interactive 3D environment and models.
+                    <br><a href="httpsm://threejs.org" target="_blank" class="text-blue-400 hover:underline">https://threejs.org</a>
+                </li>
+                <li>
+                    **Sketchfab Models (Reference for styling/display, actual files uploaded):**
+                    <ul class="mt-1 ml-4 space-y-1 list-disc list-inside">
+                        <li>Black Hole Concept: <a href="https://sketchfab.com/3d-models/black-hole-e410da98b1e5445eae2acafaaa53587d" target="_blank" class="text-blue-400 hover:underline">https://sketchfab.com/3d-models/black-hole-e410da98b1e5445eae2acafaaa53587d</a></li>
+                        <li>MacBook Model: <a href="httpspost-m3-16-inch-2024-8e34fc2b303144f78490007d91ff57c4" target="_blank" class="text-blue-400 hover:underline">https://www.apple.com/macbook-pro</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <!-- NEW: Copyright Footer -->
+             <div class="copyright-footer">
+                &copy; 2025 Daniel's Project. All rights reserved.
+             </div>
+        </div>
+    </div>
+
+
+    <!-- Main 3D Logic -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        let scene, camera, renderer, controls, starField;
+        let ambientLight, directionalLight;
+        let container = document.getElementById('canvas-container');
+
+        let blackHoleModel, macbookModel, activeModel;
+        let isMacbookLoaded = false;
+        let isBlackHoleLoaded = false;
+
+        let animationFrameId = null;
+
+        // Theme colors for 3D scene
+        const themes = {
+            light: {
+                bgColor: new THREE.Color(0xf3f4f6), // Light gray
+                ambientLight: 0.8,
+                directionalLight: 1.5
+            },
+            dark: {
+                bgColor: new THREE.Color(0x000000), // Black
+                ambientLight: 0.5,
+                directionalLight: 1.0
+            }
+        };
+
+        // --- Theme Management ---
+        const themeButtons = {
+            light: document.getElementById('theme-light'),
+            dark: document.getElementById('theme-dark'),
+            system: document.getElementById('theme-system')
+        };
+        const osThemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        // --- Function to animate UI elements in ---
+        function animateUIIn() {
+            const topLeftUI = document.getElementById('top-left-ui');
+            const dirBox = document.getElementById('directory-box');
+
+            if (topLeftUI && dirBox) {
+                 // Reset styles before animating
+                 anime.set([topLeftUI, dirBox], {
+                    opacity: 0,
+                    translateY: 50 // Start below
+                 });
+
+                 // Animate in with bounce
+                 anime({
+                     targets: topLeftUI,
+                     opacity: 1,
+                     translateY: 0,
+                     duration: 1200,
+                     easing: 'easeOutElastic(1, .6)', // Elastic bounce
+                     delay: 100 // Slight delay
+                 });
+                 anime({
+                     targets: dirBox,
+                     opacity: 1,
+                     translateY: 0,
+                     duration: 1200,
+                     easing: 'easeOutElastic(1, .6)', // Elastic bounce
+                     delay: 250 // Slightly later delay
+                 });
+            }
+        }
+
+
+        function applyTheme(theme) { // 'light', 'dark', or 'system'
+            let effectiveTheme; // 'light' or 'dark'
+
+            if (theme === 'system') {
+                effectiveTheme = osThemeQuery.matches ? 'dark' : 'light';
+                localStorage.removeItem('theme');
+            } else {
+                effectiveTheme = theme;
+                localStorage.setItem('theme', theme);
+            }
+
+            // Apply to HTML tag for Tailwind
+            if (effectiveTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+
+            // Update 3D scene
+            updateSceneTheme(effectiveTheme);
+
+            // Update button styles
+            for (const key in themeButtons) {
+                themeButtons[key].classList.remove('active');
+            }
+            themeButtons[theme].classList.add('active');
+            
+             animateUIIn(); 
+        }
+
+        function updateSceneTheme(effectiveTheme) {
+            if (!renderer) return; // Scene not initialized yet
+
+            const config = themes[effectiveTheme];
+            
+            renderer.setClearColor(config.bgColor);
+            ambientLight.intensity = config.ambientLight;
+            directionalLight.intensity = config.directionalLight;
+
+            // --- Model Swapping Logic ---
+            if (effectiveTheme === 'dark') {
+                // Show black hole
+                if (starField) starField.visible = true;
+                if (controls) {
+                    controls.autoRotate = true;
+                    controls.autoRotateSpeed = 0.8;
+                    controls.minDistance = 1200;
+                    controls.maxDistance = 10000;
+                }
+                
+                if (isMacbookLoaded && activeModel === macbookModel) {
+                    scene.remove(macbookModel);
+                }
+                if (isBlackHoleLoaded && activeModel !== blackHoleModel) {
+                    scene.add(blackHoleModel);
+                    activeModel = blackHoleModel;
+                }
+
+            } else {
+                // Show macbook (light mode)
+                if (starField) starField.visible = false;
+                if (controls) {
+                    controls.autoRotate = true; 
+                    controls.autoRotateSpeed = 0.5; 
+                    controls.minDistance = 1;
+                    controls.maxDistance = 10;
+                }
+
+                if (isBlackHoleLoaded && activeModel === blackHoleModel) {
+                    scene.remove(blackHoleModel);
+                }
+                if (isMacbookLoaded && activeModel !== macbookModel) {
+                    scene.add(macbookModel);
+                    activeModel = macbookModel;
+                }
+            }
+        }
+        
+        themeButtons.light.addEventListener('click', () => applyTheme('light'));
+        themeButtons.dark.addEventListener('click', () => applyTheme('dark'));
+        themeButtons.system.addEventListener('click', () => applyTheme('system'));
+        osThemeQuery.addEventListener('change', () => {
+             // Re-apply if we are in system mode
+            if (!localStorage.getItem('theme')) {
+                applyTheme('system');
+            }
+        });
+
+        // --- Draggable Box Logic ---
+        function makeDraggable(element, handle) {
+            let isDragging = false;
+            let isDraggableLocked = false; // Start unlocked
+            let offsetX = 0;
+            let offsetY = 0;
+
+            const lockButton = document.getElementById('drag-lock-btn');
+            const lockIconPath = document.getElementById('lock-icon-path');
+            const pathUnlock = "M18 9V7a4 4 0 00-8 0v2m8 0H6a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2v-6a2 2 0 00-2-2z";
+            const pathLock = "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z";
+
+            // Set initial state
+            lockIconPath.setAttribute('d', pathUnlock);
+            handle.style.cursor = 'grab';
+
+            lockButton.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent drag from starting
+                isDraggableLocked = !isDraggableLocked;
+                if (isDraggableLocked) {
+                    lockIconPath.setAttribute('d', pathLock);
+                    handle.style.cursor = 'default';
+                } else {
+                    lockIconPath.setAttribute('d', pathUnlock);
+                    handle.style.cursor = 'grab';
+                }
+            });
+
+            handle.addEventListener('pointerdown', (e) => {
+                if (isDraggableLocked) return;
+                e.preventDefault(); 
+                isDragging = true;
+                
+                const rect = element.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+
+                element.classList.remove('bottom-16', 'right-8', 'md:right-16', 'lg:right-32');
+
+                element.style.left = `${rect.left}px`;
+                element.style.top = `${rect.top}px`;
+
+                handle.style.cursor = 'grabbing';
+            });
+
+            window.addEventListener('pointermove', (e) => {
+                if (!isDragging) return;
+
+                let newX = e.clientX - offsetX;
+                let newY = e.clientY - offsetY;
+
+                const elRect = element.getBoundingClientRect();
+                const maxW = window.innerWidth - elRect.width;
+                const maxH = window.innerHeight - elRect.height;
+
+                if (newX < 0) newX = 0;
+                if (newY < 0) newY = 0;
+                if (newX > maxW) newX = maxW;
+                if (newY > maxH) newX = maxW;
+                
+                element.style.left = `${newX}px`;
+                element.style.top = `${newY}px`;
+            });
+
+            window.addEventListener('pointerup', () => {
+                isDragging = false;
+                if (!isDraggableLocked) {
+                    handle.style.cursor = 'grab';
+                }
+            });
+        }
+        
+        const directoryBox = document.getElementById('directory-box');
+        const directoryHandle = document.getElementById('directory-handle');
+        makeDraggable(directoryBox, directoryHandle);
+        
+
+        // --- 3D Scene Initialization ---
+        function init() {
+            scene = new THREE.Scene();
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50000);
+            camera.position.z = 150; 
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); 
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // --- Lighting ---
+            ambientLight = new THREE.AmbientLight(0xffffff, 0.5); 
+            scene.add(ambientLight);
+            
+            directionalLight = new THREE.DirectionalLight(0xffffff, 1); 
+            directionalLight.position.set(5, 10, 7.5);
+            scene.add(directionalLight);
+
+            // --- 3D Model Loader (Black Hole) ---
+            const loader = new GLTFLoader();
+            // --- Corrected path for local host and published site ---
+            const modelUrl = './black_hole.glb'; 
+
+            loader.load(modelUrl, (gltf) => {
+                blackHoleModel = gltf.scene;
+                
+                blackHoleModel.traverse((child) => {
+                    if (child.isMesh && child.material) {
+                        if (child.material.map) {
+                            child.material.transparent = true;
+                            child.material.depthWrite = false;
+                            child.material.blending = THREE.NormalBlending; 
+                            child.material.needsUpdate = true;
+                        }
+                    }
+                });
+                
+                blackHoleModel.scale.set(1, 1, 1); 
+                new THREE.Box3().setFromObject(blackHoleModel).getCenter(blackHoleModel.position).multiplyScalar(-1);
+                
+                // Add by default and set as active
+                scene.add(blackHoleModel);
+                activeModel = blackHoleModel;
+                isBlackHoleLoaded = true;
+                
+                // --- SYNCHRONIZED STARTUP: Start UI/Animations only after primary asset loads ---
+                const savedTheme = localStorage.getItem('theme') || 'system';
+                applyTheme(savedTheme); // This now calls animateUIIn
+                
+                // --- Start Shine Animation ---
+                setTimeout(animateShine, 400); 
+                setTimeout(animateWord, 500);
+
+
+            }, undefined, (error) => {
+                console.error('An error happened while loading the black hole model:', error);
+                // Display error message if model fails to load
+                if (container.children.length === 0) {
+                     container.innerHTML = '<div class="absolute inset-0 z-10 flex items-center justify-center text-center text-red-500">Failed to load 3D model (black_hole.glb). Check console for details.</div>';
+                }
+            });
+
+            // --- 3D Model Loader (Macbook) ---
+            const macbookLoader = new GLTFLoader();
+            // --- Corrected path for local host and published site ---
+            const macbookModelUrl = './macbook.glb'; 
+
+            macbookLoader.load(macbookModelUrl, (gltf) => {
+                macbookModel = gltf.scene;
+                
+                macbookModel.scale.set(10, 10, 10); 
+                new THREE.Box3().setFromObject(macbookModel).getCenter(macbookModel.position).multiplyScalar(-1);
+                
+                isMacbookLoaded = true;
+                
+                // Re-apply theme if this loads later and light mode is active
+                const savedTheme = localStorage.getItem('theme') || 'system';
+                 if ( (savedTheme === 'light') || (savedTheme === 'system' && !osThemeQuery.matches) ) {
+                     applyTheme(savedTheme);
+                 }
+
+
+            }, undefined, (error) => {
+                console.error('An error happened while loading the macbook model:', error);
+            });
+
+
+            // --- Starfield Background ---
+            const starVertices = [];
+            for (let i = 0; i < 10000; i++) {
+                const x = THREE.MathUtils.randFloatSpread(20000);
+                const y = THREE.MathUtils.randFloatSpread(20000);
+                const z = THREE.MathUtils.randFloatSpread(20000);
+                starVertices.push(x, y, z);
+            }
+            const starGeometry = new THREE.BufferGeometry();
+            starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+            const starMaterial = new THREE.PointsMaterial({
+                 color: 0xffffff,
+                 size: 2.5,
+                 transparent: true,
+                 opacity: 0.8
+            });
+            starField = new THREE.Points(starGeometry, starMaterial);
+            scene.add(starField);
+
+            // --- Controls ---
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true; 
+            controls.dampingFactor = 0.05;
+            controls.enableZoom = true; 
+            controls.autoRotate = true; 
+            controls.autoRotateSpeed = 0.8;
+            
+            // --- Event Listeners ---
+            window.addEventListener('resize', onWindowResize);
+            
+        } // End of init()
+        
+        // --- REMOVED ANTI-INSPECTION FUNCTION ---
+        /* The anti-inspection function was removed to prevent page breakage in the Canvas environment. */
+        
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            animationFrameId = requestAnimationFrame(animate);
+
+            if (controls) {
+                controls.update();
+            }
+
+            if (starField && starField.visible) {
+                starField.rotation.y += 0.0001;
+            }
+            
+            renderer.render(scene, camera);
+        }
+
+        // --- Navigation Logic ---
+        const mainContent = document.getElementById('main-content');
+        const homeButton = document.getElementById('home-button');
+        
+        const pages = {
+            aboutMe: document.getElementById('about-me-page'),
+            project: document.getElementById('project-page'),
+            contact: document.getElementById('contact-page'),
+            reference: document.getElementById('reference-page')
+        };
+        const links = {
+            aboutMe: document.getElementById('about-me-link'),
+            project: document.getElementById('project-link'),
+            contact: document.getElementById('contact-link'),
+            reference: document.getElementById('reference-link')
+        };
+
+        let activePageElement = null; // Track the currently visible page
+
+        function showHomePage() {
+            mainContent.classList.remove('hidden');
+            homeButton.classList.add('hidden');
+            // Hide all pages
+            Object.values(pages).forEach(page => page.classList.add('hidden'));
+            activePageElement = null; // No page is active
+            
+            // Pause all continuous animations
+            Object.values(panelAnimationInstances).forEach(instance => {
+                 if (instance) instance.pause();
+            });
+            
+            // Clear all directory heading splits and animations
+            Object.keys(pages).forEach(pageId => {
+                 const heading = pages[pageId].querySelector('h1.animated-heading');
+                 
+                 // Remove animation instance and its targets
+                 if (headingAnimationInstances[pageId]) {
+                     anime.remove(headingAnimationInstances[pageId].targets);
+                     delete headingAnimationInstances[pageId];
+                 }
+                 
+                 // Restore original text and clean classes
+                 if (heading && heading.originalText) {
+                     heading.innerHTML = heading.originalText; // Restore original text
+                     delete heading.originalText;
+                     heading.classList.remove('split-applied');
+                 }
+            });
+            
+            // Restart animation
+            if (!animationFrameId) {
+                animate();
+            }
+            // --- Trigger UI animation on returning home ---
+             animateUIIn();
+             animateShine(); // Restart shine animation
+        }
+
+        function showPage(pageId) {
+             mainContent.classList.add('hidden');
+             homeButton.classList.remove('hidden');
+             // Hide all pages first
+             Object.values(pages).forEach(page => page.classList.add('hidden'));
+             // Show the requested page
+             const currentPageElement = pages[pageId];
+             activePageElement = currentPageElement; // Store the active page element
+             currentPageElement.classList.remove('hidden');
+             currentPageElement.scrollTop = 0; // Scroll to top
+
+             // Stop animation
+             if (animationFrameId) {
+                 cancelAnimationFrame(animationFrameId);
+                 animationFrameId = null;
+             }
+             
+             // --- NEW: Page entrance animation ---
+             const glassPanel = currentPageElement.querySelector('.glass-panel');
+             if (glassPanel) {
+                 anime.set(glassPanel, { opacity: 0, translateY: 20 }); // Start slightly below
+                 anime({
+                     targets: glassPanel,
+                     opacity: 1,
+                     translateY: 0,
+                     duration: 800,
+                     easing: 'easeOutSine',
+                     // Chain continuous hover animation to the end of the entrance animation
+                     complete: function() {
+                         animateContinuousHover(pageId); 
+                     }
+                 });
+             }
+             
+             // --- Run the Character Slide animation (Replacing the old line-clip/color-wave) ---
+             animateHeadingCharSlide(pageId);
+        }
+
+        links.aboutMe.addEventListener('click', () => showPage('aboutMe'));
+        links.project.addEventListener('click', () => showPage('project'));
+        links.contact.addEventListener('click', () => showPage('contact'));
+        links.reference.addEventListener('click', () => showPage('reference'));
+        homeButton.addEventListener('click', showHomePage);
+
+        // --- Continuous Hover Animation Logic ---
+        let panelAnimationInstances = {};
+
+        function animateContinuousHover(pageId) {
+            const orbElement = document.getElementById(`orb-${pageId}`);
+            if (!orbElement) return;
+
+            // Stop any existing animation on this panel
+            if (panelAnimationInstances[pageId]) {
+                 panelAnimationInstances[pageId].pause();
+            }
+            
+            // Apply the continuous float/hover effect to the ORB
+            panelAnimationInstances[pageId] = anime({
+                 targets: orbElement,
+                 translateX: [
+                     { value: anime.random(-300, 300), duration: 7000, easing: 'easeInOutQuad' },
+                     { value: anime.random(-300, 300), duration: 6000, easing: 'easeInOutSine' },
+                     { value: anime.random(-300, 300), duration: 8000, easing: 'easeInOutExpo' }
+                 ],
+                 translateY: [
+                     { value: anime.random(-300, 300), duration: 7500, easing: 'easeInOutSine' },
+                     { value: anime.random(-300, 300), duration: 6500, easing: 'easeInOutQuad' },
+                     { value: anime.random(-300, 300), duration: 5500, easing: 'easeInOutExpo' }
+                 ],
+                 scale: [
+                     { value: 1.2, duration: 4000, easing: 'easeInOutSine' },
+                     { value: 0.8, duration: 4000, easing: 'easeInOutSine' }
+                 ],
+                 duration: 8000,
+                 direction: 'alternate',
+                 loop: true
+            });
+        }
+        
+        // --- Directory Heading Character Slide Animation ---
+        let headingAnimationInstances = {};
+
+        function animateHeadingCharSlide(pageId) {
+            const pageElement = pages[pageId];
+            const heading = pageElement.querySelector('h1.animated-heading');
+            if (!heading) return;
+
+            // 1. Clean slate: Remove previous targets and animation
+            if (headingAnimationInstances[pageId]) {
+                 anime.remove(headingAnimationInstances[pageId].targets);
+                 delete headingAnimationInstances[pageId];
+            }
+            anime.remove(heading);
+
+
+            // Restore original text
+            if (!heading.originalText) {
+                heading.originalText = heading.textContent.trim();
+            } else {
+                heading.innerHTML = heading.originalText;
+            }
+            heading.classList.remove('split-applied'); 
+            
+
+            // 2. Split text by character, wrapping with 'clip' (mimicking requested structure)
+            const text = heading.textContent;
+            heading.innerHTML = text.replace(/\S/g, char => {
+                return `<span class="anime-char-wrap"><span class="anime-char">${char}</span></span>`;
+            });
+            
+            // 3. Apply the requested character slide animation
+            const targets = heading.querySelectorAll('.anime-char');
+            
+            headingAnimationInstances[pageId] = anime({
+                targets: targets,
+                translateY: [
+                     // Slide in from 100% (bottom) to 0% (natural position)
+                    { value: ['100%', '0%'], duration: 750, easing: 'easeOutExpo' }, 
+                     // Slide out from 0% to -100% (top)
+                    { value: '-100%', delay: 750, duration: 750, easing: 'easeInExpo' } 
+                ],
+                delay: anime.stagger(50),
+                loop: true,
+                loopDelay: 500,
+                // Ensures targets start off-screen before the loop begins
+                begin: function(anim) {
+                    anime.set(targets, { translateY: '100%' });
+                },
+                // Re-set position at the beginning of each loop for continuity
+                loopBegin: function(anim) {
+                    anime.set(targets, { translateY: '100%' });
+                }
+            });
+            
+            heading.classList.add('split-applied');
+        }
+        
+        // --- NEW: Front Page Title Shine Effect ---
+        function animateShine() {
+            const titleElement = document.getElementById('animated-title');
+            if (!titleElement) return;
+
+            // Apply the background animation to create the moving shine effect
+            // Duration increased to 12000ms (12 seconds) for a slower, more dramatic effect.
+            anime({
+                targets: titleElement,
+                backgroundPositionX: ['100%', '-300%'], // Animate from right to far left
+                easing: 'linear',
+                duration: 12000, 
+                loop: true
+            });
+        }
+
+
+        // --- Main Execution ---
+        
+        // --- SYNCHRONIZATION POINT ---
+        window.addEventListener('load', () => {
+             init();
+             animate(); // Start 3D animation loop
+             
+             // Time and Weather setup moved here
+             updateTime(); 
+             setInterval(updateTime, 60000); 
+             fetchWeather();
+        });
+
+
+        // --- anime.js Subtitle Animation (Remains the same) ---
+        const textWrapper = document.getElementById('anime-text-target');
+        const words = [
+            'HTML.',
+            'JavaScript.',
+            'anime.js.',
+            'Three.js.',
+            'and Tailwind CSS.'
+        ];
+        let wordIndex = 0;
+        let animationTimeout;
+
+        function animateWord() {
+            clearTimeout(animationTimeout); // Clear previous timeout if any
+            if (!textWrapper) return; 
+            
+            const word = words[wordIndex];
+            
+            // Wrap letters in spans
+            textWrapper.innerHTML = word.replace(/\S/g, "<span class='letter'>$&</span>");
+            
+            anime.timeline({loop: false})
+              .add({
+                targets: '#anime-text-target .letter',
+                translateY: [10, 0], 
+                opacity: [0, 1],    
+                easing: "easeOutExpo",
+                duration: 600,
+                delay: anime.stagger(50) 
+              }).add({ 
+                targets: '#anime-text-target .letter',
+                opacity: 1, 
+                duration: 1500, 
+                complete: function(anim) {
+                   anime({ 
+                     targets: '#anime-text-target .letter',
+                     translateY: [0, -10], 
+                     opacity: [1, 0],     
+                     easing: "easeInExpo",
+                     duration: 400,
+                     delay: anime.stagger(30, {direction: 'reverse'}),
+                     complete: function() {
+                         wordIndex = (wordIndex + 1) % words.length;
+                         animationTimeout = setTimeout(animateWord, 100); 
+                     }
+                   });
+                }
+              });
+        }
+        
+        // --- RESTORED: Title Animation Logic (REMOVED) ---
+        // function wrapLetters(element) { ... }
+        // function animateTitle() { ... }
+
+
+        // --- Timezone Update Logic ---
+        const timeElement = document.getElementById('current-time');
+        const utcTimeElement = document.getElementById('utc-time');
+        const estTimeElement = document.getElementById('est-time');
+        const pstTimeElement = document.getElementById('pst-time');
+        const cetTimeElement = document.getElementById('cet-time');
+
+        function updateTime() {
+             const now = new Date();
+             const options = { hour: '2-digit', minute: '2-digit', hour12: true };
+
+             if (timeElement) {
+                 timeElement.textContent = now.toLocaleTimeString('en-US', { ...options, timeZone: 'Asia/Kuala_Lumpur' });
+             }
+             if (utcTimeElement) {
+                 utcTimeElement.textContent = now.toLocaleTimeString('en-US', { ...options, timeZone: 'UTC' });
+             }
+             if (estTimeElement) {
+                 estTimeElement.textContent = now.toLocaleTimeString('en-US', { ...options, timeZone: 'America/New_York' });
+             }
+              if (pstTimeElement) {
+                 pstTimeElement.textContent = now.toLocaleTimeString('en-US', { ...options, timeZone: 'America/Los_Angeles' });
+             }
+             if (cetTimeElement) {
+                 cetTimeElement.textContent = now.toLocaleTimeString('en-US', { ...options, timeZone: 'Europe/Berlin' });
+             }
+        }
+
+        // --- Weather Fetch Logic (Stable Localized Simulation) ---
+        
+        const weatherIcons = {
+            sunny: "M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-6.364-.386 1.591-1.591M3 12h2.25m.386-6.364 1.591 1.591",
+            cloudy: "M2.25 15a4.5 4.5 0 0 1 4.5-4.5h8.25a4.5 4.5 0 0 1 4.5 4.5v0a4.5 4.5 0 0 1-4.5 4.5h-8.25a4.5 4.5 0 0 1-4.5-4.5v0Z M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z",
+            rainy: "M9 12.75l.386.214a.75.75 0 0 1-.772 0l.386-.214ZM12 14.25l.386.214a.75.75 0 0 1-.772 0l.386-.214ZM15 12.75l.386.214a.75.75 0 0 1-.772 0l.386-.214ZM10.5 15.75h3 M8.25 17.25h7.5 M6 18.75h12 M4.5 10.5a7.5 7.5 0 0 1 15 0v.667a9.75 9.75 0 0 1-1.5 5.083 9.75 9.75 0 0 1-12 0A9.75 9.75 0 0 1 4.5 11.167V10.5Z", 
+            thunder: "M11.25 4.5l7.5 7.5-7.5 7.5 M6.75 20.25h10.5a2.25 2.25 0 0 0 2.25-2.25V6a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6v12a2.25 2.25 0 0 0 2.25 2.25Z" 
+        };
+
+        function getWeatherIcon(conditionText) {
+            conditionText = conditionText.toLowerCase();
+            if (conditionText.includes('sun') || conditionText.includes('clear')) return weatherIcons.sunny;
+            if (conditionText.includes('rain') || conditionText.includes('shower')) return weatherIcons.rainy;
+            if (conditionText.includes('thunder') || conditionText.includes('storm')) return weatherIcons.thunder;
+            if (conditionText.includes('cloud') || conditionText.includes('hazy') || conditionText.includes('partly')) return weatherIcons.cloudy;
+            return weatherIcons.sunny; 
+        }
+
+        function fetchWeather() {
+            const weatherElement = document.getElementById('current-weather');
+            const weatherIconPath = document.getElementById('weather-icon').querySelector('path');
+
+            // --- Localized Simulation for Kuala Lumpur ---
+            const simulations = [
+                { temp: '32°C', condition: 'Hot & Hazy', icon: weatherIcons.sunny },
+                { temp: '26°C', condition: 'Heavy Rain', icon: weatherIcons.rainy },
+                { temp: '28°C', condition: 'Partly Cloudy', icon: weatherIcons.cloudy },
+                { temp: '25°C', condition: 'Thunderstorm', icon: weatherIcons.thunder },
+                { temp: '30°C', condition: 'Mostly Sunny', icon: weatherIcons.sunny }
+            ];
+
+            const simulation = simulations[Math.floor(Math.random() * simulations.length)];
+            
+            weatherElement.textContent = `${simulation.temp}, ${simulation.condition}`;
+            weatherIconPath.setAttribute('d', simulation.icon);
+        }
+    </script>
+</body>
+</html>
