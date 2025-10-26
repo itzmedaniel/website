@@ -142,7 +142,12 @@
 
 
         canvas {
-            touch-action: manipulation;
+            /*
+              FIX: 'none' prevents all default browser touch actions 
+              (like page scroll or pinch-zoom) on the canvas,
+              giving full control to the Three.js OrbitControls. 
+            */
+            touch-action: none;
             display: block;
             width: 100%;
             height: 100%;
@@ -305,6 +310,13 @@
             transform: translateY(100%); /* Starting position set by JS animation */
         }
         /* --- END: DIRECTORY HEADING CHARACTER SLIDE ANIMATION STYLES --- */
+
+        /* FIX: Add rule for directory handle touch interaction */
+        #directory-handle {
+            /* Prevents the page from scrolling when the user
+               is trying to drag the directory box handle. */
+            touch-action: none;
+        }
 
 
         /* UPDATED: Futuristic Glass Panel Styles (Opaque Inner) */
