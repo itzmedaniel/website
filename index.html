@@ -286,8 +286,7 @@
             width: 1.25rem; /* w-5 */
             height: 1.25rem; /* h-5 */
             opacity: 0.8;
-            /* UPDATED: Set fill color for new icons */
-            fill: currentColor;
+            /* UPDATED: fill is removed here, handled by paths */
         }
         .forecast-item .temp {
              font-weight: 600; /* font-semibold */
@@ -309,8 +308,7 @@
          #sunset-info svg {
              width: 0.875rem; /* w-3.5 */
              height: 0.875rem; /* h-3.5 */
-             /* UPDATED: Set fill color for new icon */
-             fill: currentColor;
+             /* UPDATED: fill is removed here, handled by paths */
          }
 
 
@@ -634,10 +632,10 @@
                 <div id="weather-info" class="info-item">
                      <!-- Weather Icon Placeholder SVG (Sun) -->
                      <!-- Added explicit width/height classes for display robustness -->
-                     <svg id="weather-icon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
-                         <!-- Path d is updated by JS -->
-                         <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m-5-6.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m11 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m-9.757-2.121a.5.5 0 0 1 .707 0l1.414 1.414a.5.5 0 1 1-.707.707L3.243 5.05a.5.5 0 0 1 0-.707m9.9 9.9a.5.5 0 0 1 .707 0l1.414 1.414a.5.5 0 1 1-.707.707L12.757 14.95a.5.5 0 0 1 0-.707m-9.9-7.07a.5.5 0 0 1 0 .707L5.05 12.757a.5.5 0 0 1-.707.707L2.929 12.05a.5.5 0 0 1 .707-.707m9.9 0a.5.5 0 0 1 0 .707L14.95 12.757a.5.5 0 0 1-.707.707L12.828 12.05a.5.5 0 0 1 .707-.707"/>
-                    </svg>
+                     <!-- UPDATED: SVG element is now just a container -->
+                     <svg id="weather-icon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 16 16">
+                         <!-- Paths are updated by JS -->
+                     </svg>
                     <span id="current-weather">Loading...</span>
                     <span>(Kuala Lumpur)</span>
                 </div>
@@ -649,8 +647,9 @@
                  
                  <!-- NEW: Sunset info -->
                  <div id="sunset-info">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
-                       <path d="M7.646 4.854a.5.5 0 0 0 .708 0l1.5-1.5a.5.5 0 0 0-.708-.708L8 3.793 6.854 2.646a.5.5 0 1 0-.708.708l1.5 1.5zM1.707 8.293A.5.5 0 0 1 2 8h12a.5.5 0 0 1 .293.707l-4 4a.5.5 0 0 1-.586 0l-4-4a.5.5 0 0 1-.007-.707zM14 6H2a.5.5 0 0 1 0-1h12a.5.5 0 0 1 0 1"/>
+                     <!-- UPDATED: SVG element is now just a container -->
+                     <svg id="sunset-icon-svg" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 16 16">
+                        <!-- Path updated by JS -->
                      </svg>
                      <span>Sunset will be at...</span>
                  </div>
@@ -885,7 +884,7 @@
                  <!-- NEW: Added PNG Reference -->
                 <li>
                     **Pochita PNG:** Sourced from pnganime.com for the bouncing logo effect.
-                    <br><a href="https://pnganime.com/gallery/puchita-png" target="_blank" class="text-blue-400 hover:underline">https://pnganime.com/gallery/puchita-png</a>
+                    <br><a href="httpshttps://pnganime.com/gallery/puchita-png" target="_blank" class="text-blue-400 hover:underline">https://pnganime.com/gallery/puchita-png</a>
                 </li>
                 <li>
                     **Sketchfab Models (Reference for styling/display, actual files uploaded):**
@@ -1003,7 +1002,7 @@
             
              // FIX: Call animateUIIn from here, which is now called on page load
              // *regardless* of 3D model status.
-             animateUIIn(); 
+             // --- REMOVED: animateUIIn() call was moved to window.onload to prevent race condition ---
         }
 
         function updateSceneTheme(effectiveTheme) {
@@ -1196,19 +1195,16 @@
                 blackHoleModel.scale.set(1, 1, 1); 
                 new THREE.Box3().setFromObject(blackHoleModel).getCenter(blackHoleModel.position).multiplyScalar(-1);
                 
-                // Add by default and set as active
-                scene.add(blackHoleModel);
-                activeModel = blackHoleModel;
+                // --- UPDATED: Don't add to scene immediately ---
+                // scene.add(blackHoleModel);
+                // activeModel = blackHoleModel;
                 isBlackHoleLoaded = true;
                 
-                // --- MOVED UI ANIMATION TO window.onload ---
-                
-                // --- NEW (Safer) ---
-                // Re-apply theme just to make sure the correct model is visible
-                const savedTheme = localStorage.getItem('theme') || 'system';
-                const effectiveTheme = (savedTheme === 'system') ? (osThemeQuery.matches ? 'dark' : 'light') : savedTheme;
-                updateSceneTheme(effectiveTheme); // Just update the 3D part
-
+                // --- THEME BUG FIX ---
+                // Check if the theme logic should be run now
+                if (isMacbookLoaded) {
+                    triggerInitialTheme();
+                }
 
             }, undefined, (error) => {
                 console.error('An error happened while loading the black hole model:', error);
@@ -1232,16 +1228,11 @@
                 
                 isMacbookLoaded = true;
                 
-                // --- MOVED UI ANIMATION TO window.onload ---
-
-                // --- NEW (Safer) ---
-                // Re-apply theme just to make sure the correct model is visible
-                const savedTheme = localStorage.getItem('theme') || 'system';
-                const effectiveTheme = (savedTheme === 'system') ? (osThemeQuery.matches ? 'dark' : 'light') : savedTheme;
-                if (effectiveTheme === 'light') {
-                    updateSceneTheme('light'); // Just update the 3D part
+                // --- THEME BUG FIX ---
+                // Check if the theme logic should be run now
+                if (isBlackHoleLoaded) {
+                    triggerInitialTheme();
                 }
-
 
             }, undefined, (error) => {
                 console.error('An error happened while loading the macbook model:', error);
@@ -1284,6 +1275,22 @@
             
         } // End of init()
         
+        // --- THEME BUG FIX ---
+        // This function applies the theme *after* both models are loaded
+        let initialThemeApplied = false;
+        function triggerInitialTheme() {
+            if (initialThemeApplied) return; // Only run once
+            initialThemeApplied = true;
+            
+            // Now, apply the theme which will also show the correct model
+            const savedTheme = localStorage.getItem('theme') || 'system';
+            applyTheme(savedTheme);
+            
+            // Now it's safe to animate the UI
+            animateUIIn();
+        }
+        // --- END THEME BUG FIX ---
+
         function onWindowResize() {
             if (camera) {
                 camera.aspect = window.innerWidth / window.innerHeight;
@@ -1415,13 +1422,6 @@
              
              // --- UPDATED: Start bouncing logo for ALL pages ---
              startBouncingLogo();
-             /*
-             if (pageId === 'aboutMe') {
-                startBouncingLogo();
-             } else {
-                stopBouncingLogo(); // Ensure it's stopped for other pages
-             }
-             */
         }
 
         if(links.aboutMe) links.aboutMe.addEventListener('click', () => showPage('aboutMe'));
@@ -1621,10 +1621,10 @@
              fetchWeather(); // Fetch weather on load
              setInterval(fetchWeather, 120000); // UPDATED: Re-fetch weather every 2 minutes
 
-             // --- NEW LOCATION FOR UI ANIMATIONS ---
-             // Run UI animations immediately on load, don't wait for 3D models
-             const savedTheme = localStorage.getItem('theme') || 'system';
-             applyTheme(savedTheme); // This will call animateUIIn
+             // --- THEME BUG FIX ---
+             // UI animations are now called from triggerInitialTheme() after models are loaded
+             // const savedTheme = localStorage.getItem('theme') || 'system';
+             // applyTheme(savedTheme); // This is now called from triggerInitialTheme
             
              // --- OPTIMIZATION: Removed call to JS-based animateShine() ---
              setTimeout(animateWord, 500);
@@ -1715,15 +1715,40 @@
 
         // --- LIVE Weather Fetch Logic (Open-Meteo) ---
         
-        // UPDATED: Icons for WMO Weather codes (Filled, modern style)
+        // UPDATED: New two-tone icons
         const weatherIcons = {
-            sunny: "M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m-5-6.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m11 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m-9.757-2.121a.5.5 0 0 1 .707 0l1.414 1.414a.5.5 0 1 1-.707.707L3.243 5.05a.5.5 0 0 1 0-.707m9.9 9.9a.5.5 0 0 1 .707 0l1.414 1.414a.5.5 0 1 1-.707.707L12.757 14.95a.5.5 0 0 1 0-.707m-9.9-7.07a.5.5 0 0 1 0 .707L5.05 12.757a.5.5 0 0 1-.707.707L2.929 12.05a.5.5 0 0 1 .707-.707m9.9 0a.5.5 0 0 1 0 .707L14.95 12.757a.5.5 0 0 1-.707.707L12.828 12.05a.5.5 0 0 1 .707-.707",
-            nightClear: "M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792 0 1.57-.122a.77.77 0 0 1 .979.81A8.96 8.96 0 0 1 8.998 16a8.993 8.993 0 0 1-8.7-9.347A8.96 8.96 0 0 1 6 .278",
-            cloudy: "M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973",
-            nightCloudy: "M11.473 11a5 5 0 0 0-8.72-.99A3.5 3.5 0 0 0 3.5 13H9.5a3 3 0 0 0 .405-5.973.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 1.39.37 2.678 1.005 3.666",
-            rainy: "M4.158 12.025a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973", 
-            thunder: "M5.301 3.164a.5.5 0 0 1 .59.037L9.5 5.5h2.02a.5.5 0 0 1 .454.72l-2 4a.5.5 0 0 1-.884-.437L9.08 7.5H7.5a.5.5 0 0 1-.454-.72l2-4a.5.5 0 0 1 .255-.276M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973",
-            sunset: "M7.646 4.854a.5.5 0 0 0 .708 0l1.5-1.5a.5.5 0 0 0-.708-.708L8 3.793 6.854 2.646a.5.5 0 1 0-.708.708l1.5 1.5zM1.707 8.293A.5.5 0 0 1 2 8h12a.5.5 0 0 1 .293.707l-4 4a.5.5 0 0 1-.586 0l-4-4a.5.5 0 0 1-.007-.707zM14 6H2a.5.5 0 0 1 0-1h12a.5.5 0 0 1 0 1"
+            sunny: `
+                <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8" fill="#FDB813"/>
+                <path d="M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m-5-6.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m11 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m-9.757-2.121a.5.5 0 0 1 .707 0l1.414 1.414a.5.5 0 1 1-.707.707L3.243 5.05a.5.5 0 0 1 0-.707m9.9 9.9a.5.5 0 0 1 .707 0l1.414 1.414a.5.5 0 1 1-.707.707L12.757 14.95a.5.5 0 0 1 0-.707m-9.9-7.07a.5.5 0 0 1 0 .707L5.05 12.757a.5.5 0 0 1-.707.707L2.929 12.05a.5.5 0 0 1 .707-.707m9.9 0a.5.5 0 0 1 0 .707L14.95 12.757a.5.5 0 0 1-.707.707L12.828 12.05a.5.5 0 0 1 .707-.707" fill="currentColor"/>
+            `,
+            nightClear: `
+                <path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792 0 1.57-.122a.77.77 0 0 1 .979.81A8.96 8.96 0 0 1 8.998 16a8.993 8.993 0 0 1-8.7-9.347A8.96 8.96 0 0 1 6 .278" fill="#F3E5AB"/>
+            `,
+            cloudy: `
+                <path d="M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973" fill="currentColor" opacity="0.7"/>
+            `,
+            partlyCloudyDay: `
+                <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8" fill="#FDB813" style="transform: translate(-2px, -2px); z-index: 1;"/>
+                <path d="M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973" fill="currentColor" opacity="0.7" style="z-index: 2;"/>
+            `,
+            partlyCloudyNight: `
+                <path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792 0 1.57-.122a.77.77 0 0 1 .979.81A8.96 8.96 0 0 1 8.998 16a8.993 8.993 0 0 1-8.7-9.347A8.96 8.96 0 0 1 6 .278" fill="#F3E5AB" style="transform: scale(0.6) translate(6px, -5px); z-index: 1;"/>
+                <path d="M11.473 11a5 5 0 0 0-8.72-.99A3.5 3.5 0 0 0 3.5 13H9.5a3 3 0 0 0 .405-5.973.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 1.39.37 2.678 1.005 3.666" fill="currentColor" opacity="0.7" style="z-index: 2;"/>
+            `,
+            rainy: `
+                <path d="M4.158 12.025a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317" fill="#4682B4"/>
+                <path d="M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973" fill="currentColor" opacity="0.7"/>
+            `, 
+            thunder: `
+                <path d="M5.301 3.164a.5.5 0 0 1 .59.037L9.5 5.5h2.02a.5.5 0 0 1 .454.72l-2 4a.5.5 0 0 1-.884-.437L9.08 7.5H7.5a.5.5 0 0 1-.454-.72l2-4a.5.5 0 0 1 .255-.276" fill="#FDB813" style="z-index: 2;"/>
+                <path d="M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973" fill="currentColor" opacity="0.7" style="z-index: 1;"/>
+            `,
+            // UPDATED: New Google/Samsung inspired sunset icon
+            sunset: `
+                <path d="M8 12a4 4 0 0 0 4-4H4a4 4 0 0 0 4 4" fill="#FDB813" />
+                <path d="M1 12h14" stroke="currentColor" stroke-width="1" opacity="0.7" />
+                <path d="M8 5l-2 2h4l-2-2z" fill="currentColor" opacity="0.7" />
+            `
         };
 
         // Maps WMO codes to text and icon
@@ -1732,10 +1757,10 @@
             const codes = {
                 0: { text: "Clear sky", icon: isDay ? weatherIcons.sunny : weatherIcons.nightClear },
                 1: { text: "Mainly clear", icon: isDay ? weatherIcons.sunny : weatherIcons.nightClear },
-                2: { text: "Partly cloudy", icon: isDay ? weatherIcons.cloudy : weatherIcons.nightCloudy },
-                3: { text: "Overcast", icon: isDay ? weatherIcons.cloudy : weatherIcons.nightCloudy },
-                45: { text: "Fog", icon: isDay ? weatherIcons.cloudy : weatherIcons.nightCloudy },
-                48: { text: "Depositing rime fog", icon: isDay ? weatherIcons.cloudy : weatherIcons.nightCloudy },
+                2: { text: "Partly cloudy", icon: isDay ? weatherIcons.partlyCloudyDay : weatherIcons.partlyCloudyNight },
+                3: { text: "Overcast", icon: weatherIcons.cloudy },
+                45: { text: "Fog", icon: weatherIcons.cloudy },
+                48: { text: "Depositing rime fog", icon: weatherIcons.cloudy },
                 51: { text: "Light drizzle", icon: weatherIcons.rainy },
                 53: { text: "Moderate drizzle", icon: weatherIcons.rainy },
                 55: { text: "Dense drizzle", icon: weatherIcons.rainy },
@@ -1748,7 +1773,6 @@
                 95: { text: "Thunderstorm", icon: weatherIcons.thunder },
                 96: { text: "Thunderstorm, slight hail", icon: weatherIcons.thunder },
                 99: { text: "Thunderstorm, heavy hail", icon: weatherIcons.thunder }
-                // Add more codes as needed
             };
             return codes[code] || { text: "Clear", icon: isDay ? weatherIcons.sunny : weatherIcons.nightClear }; // Default to clear
         }
@@ -1757,7 +1781,9 @@
             const weatherElement = document.getElementById('current-weather');
             const weatherIcon = document.getElementById('weather-icon'); // Get the SVG element
             const forecastContainer = document.getElementById('hourly-forecast-container');
-            const sunsetElement = document.getElementById('sunset-info').querySelector('span'); // NEW
+            const sunsetInfoElement = document.getElementById('sunset-info'); // Get the whole div
+            const sunsetElement = sunsetInfoElement.querySelector('span');
+            const sunsetIconSvg = document.getElementById('sunset-icon-svg'); // Get the sunset icon SVG
             
             // Kuala Lumpur coordinates
             const lat = 3.139;
@@ -1785,21 +1811,25 @@
                 }
                 if (weatherIcon) {
                     // UPDATED: Set innerHTML to the new icon path
-                    weatherIcon.innerHTML = `<path d="${weatherDetails.icon}"/>`;
+                    weatherIcon.innerHTML = weatherDetails.icon;
                 }
                 
                 // --- Process SUNSET ---
                 const sunsetTimeStr = data.daily.sunset[0];
                 const sunsetDate = new Date(sunsetTimeStr);
-                // UPDATED: Format sunset time to 12-hr AM/PM
+                // UPDATED: Format sunset time to 24-hour (e.g., "18:56")
                 const sunsetTime = sunsetDate.toLocaleTimeString('en-US', {
                     hour: '2-digit',
                     minute: '2-digit',
-                    hour12: true
-                }); // e.g., "6:56 PM"
+                    hour12: false,
+                    timeZone: 'Asia/Kuala_Lumpur'
+                }); // e.g., "18:56"
                 
                 if (sunsetElement) {
-                    sunsetElement.textContent = `Sunset will be at ${sunsetTime}`; // e.g., "Sunset will be at 6:56 PM"
+                    sunsetElement.textContent = `Sunset will be at ${sunsetTime}`; // e.g., "Sunset will be at 18:56"
+                }
+                if (sunsetIconSvg) {
+                    sunsetIconSvg.innerHTML = weatherIcons.sunset; // Set the sunset icon paths
                 }
                 const sunsetHour = sunsetDate.getHours(); // e.g., 18
 
@@ -1826,13 +1856,13 @@
                         const hourDate = new Date(timeStr);
                         const hour = hourDate.getHours();
                         
-                        // UPDATED: Format time to 12-hour AM/PM (e.g., "7:00 PM")
-                        // FIX: Change to `let`
+                        // UPDATED: Format time to 24-hour (e.g., "19:00")
                         let timeLabel = hourDate.toLocaleTimeString('en-US', {
-                            hour: 'numeric',
+                            hour: '2-digit',
                             minute: '2-digit', // Added minutes
-                            hour12: true
-                        }); // e.g., "7:00 PM"
+                            hour12: false,
+                            timeZone: 'Asia/Kuala_Lumpur'
+                        }); // e.g., "19:00"
 
                         const hourlyTemp = Math.round(hourlyData.temperature_2m[i]);
                         const hourlyCode = hourlyData.weather_code[i];
@@ -1844,20 +1874,20 @@
                         item.className = 'forecast-item';
                         
                         let tempLabel = `${hourlyTemp}°`;
-                        let iconPath = hourlyWeatherDetails.icon;
+                        let iconPaths = hourlyWeatherDetails.icon; // Use paths string
 
                         // --- NEW: Sunset Logic ---
                         // Check if this hour is the sunset hour
                         if (hour === sunsetHour) {
-                             timeLabel = sunsetTime; // Use exact sunset time e.g., "6:56 PM"
+                             timeLabel = sunsetTime; // Use exact sunset time e.g., "18:56"
                              tempLabel = "Sunset";
-                             iconPath = weatherIcons.sunset; // Use sunset icon
+                             iconPaths = weatherIcons.sunset; // Use sunset icon
                         }
 
                         item.innerHTML = `
                             <span>${timeLabel}</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
-                                <path d="${iconPath}" />
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                                ${iconPaths}
                             </svg>
                             <span class="temp">${tempLabel}</span>
                             <span class="precip">${hourlyPrecip}%</span>
@@ -1874,13 +1904,16 @@
                 }
                  if (weatherIcon) {
                     // UPDATED: Set innerHTML to the default icon path on error
-                    weatherIcon.innerHTML = `<path d="${weatherIcons.sunny}"/>`;
+                    weatherIcon.innerHTML = weatherIcons.sunny;
                 }
                 if (forecastContainer) {
                     forecastContainer.innerHTML = '<span class="text-xs text-red-500 opacity-70">Forecast unavailable</span>';
                 }
                 if (sunsetElement) {
                     sunsetElement.textContent = "Sunset time unavailable";
+                }
+                if (sunsetIconSvg) {
+                    sunsetIconSvg.innerHTML = weatherIcons.sunset;
                 }
             }
         }
