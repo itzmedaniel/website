@@ -7,7 +7,7 @@
     <title>Daniel's Project</title>
     
     <!-- === UPDATED FAVICON LINKS (using full raw GitHub URLs) === -->
-    <link rel="apple-touch-icon" sizes="180x180" href="httpsl://raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="https://raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="https://raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/favicon-16x16.png">
     <link rel="manifest" href="https://raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/site.webmanifest">
@@ -137,6 +137,7 @@
         ::-webkit-scrollbar {
             /* Allow scrollbar for pages */
              width: 8px;
+             height: 8px; /* Added for horizontal scroll */
         }
          ::-webkit-scrollbar-track {
             background: transparent; /* Make track invisible */
@@ -248,6 +249,70 @@
              font-size: 0.75rem; /* text-xs */
              opacity: 0.8;
         }
+
+        /* NEW: Hourly forecast container */
+        #hourly-forecast-container {
+            margin-top: 0.75rem; /* mt-3 */
+            padding-bottom: 0.5rem; /* pb-2 */
+            display: flex;
+            flex-direction: row;
+            gap: 0.75rem; /* space-x-3 */
+            overflow-x: auto; /* Enable horizontal scroll */
+            white-space: nowrap; /* Prevent wrapping */
+            max-width: 100%; /* Ensure it fits width */
+        }
+        .forecast-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem; /* space-y-1 */
+            font-size: 0.75rem; /* text-xs */
+            font-weight: 500; /* font-medium */
+            padding: 0.25rem 0.5rem; /* p-1 px-2 */
+            border-radius: 0.375rem; /* rounded-md */
+            
+            /* UPDATED: Added faint border */
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            /* Light mode bg */
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+        .dark .forecast-item {
+            /* UPDATED: Added faint border */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            /* Dark mode bg */
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .forecast-item svg {
+            width: 1.25rem; /* w-5 */
+            height: 1.25rem; /* h-5 */
+            opacity: 0.8;
+            /* UPDATED: Set fill color for new icons */
+            fill: currentColor;
+        }
+        .forecast-item .temp {
+             font-weight: 600; /* font-semibold */
+             font-size: 0.875rem; /* text-sm */
+        }
+        .forecast-item .precip {
+            opacity: 0.6;
+        }
+
+        /* NEW: Sunset info */
+        #sunset-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem; /* text-xs */
+            opacity: 0.7;
+            margin-top: 0.5rem; /* mt-2 */
+        }
+         #sunset-info svg {
+             width: 0.875rem; /* w-3.5 */
+             height: 0.875rem; /* h-3.5 */
+             /* UPDATED: Set fill color for new icon */
+             fill: currentColor;
+         }
+
 
         /* --- START: FRONT PAGE CHROME METALLIC SHINE EFFECT (ULTRA SHARP CHROME) --- */
         
@@ -436,52 +501,9 @@
             box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3);
         }
         
-        /* NEW: Gemini Button Style */
-        .gemini-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            transition: all 0.2s;
-            cursor: pointer;
-            background-color: #8b5cf6; /* Violet */
-            color: white;
-            border: 1px solid transparent;
-        }
-        .gemini-btn:hover {
-            background-color: #7c3aed;
-        }
-        .gemini-btn:disabled {
-            opacity: 0.5;
-            cursor: wait;
-        }
-
-        /* NEW: Gemini Results Box */
-        .gemini-results {
-            margin-top: 1.5rem; /* mt-6 */
-            padding: 1rem; /* p-4 */
-            border-radius: 0.5rem; /* rounded-lg */
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-        .dark .gemini-results {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-        .gemini-results h2 {
-            font-size: 1.25rem; /* text-xl */
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-        .gemini-results ul {
-            list-style-type: disc;
-            list-style-position: inside;
-            padding-left: 0.5rem;
-        }
-        .gemini-results li {
-            margin-bottom: 0.5rem;
-        }
-
+        /* REMOVED: Gemini Button Style */
+        
+        /* REMOVED: Gemini Results Box */
 
         .social-icon-link {
             width: 3rem;
@@ -602,8 +624,9 @@
             <div class="mt-4"> 
                 <div id="timezone-info" class="info-item">
                     <!-- Clock Icon SVG -->
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
+                         <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z"/>
+                         <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0"/>
                     </svg>
                     <span id="current-time">Loading time...</span> 
                     <span class="font-semibold">MYT</span>
@@ -611,13 +634,28 @@
                 <div id="weather-info" class="info-item">
                      <!-- Weather Icon Placeholder SVG (Sun) -->
                      <!-- Added explicit width/height classes for display robustness -->
-                     <svg id="weather-icon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-6.364-.386 1.591-1.591M3 12h2.25m.386-6.364 1.591 1.591" />
+                     <svg id="weather-icon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
+                         <!-- Path d is updated by JS -->
+                         <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m-5-6.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m11 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m-9.757-2.121a.5.5 0 0 1 .707 0l1.414 1.414a.5.5 0 1 1-.707.707L3.243 5.05a.5.5 0 0 1 0-.707m9.9 9.9a.5.5 0 0 1 .707 0l1.414 1.414a.5.5 0 1 1-.707.707L12.757 14.95a.5.5 0 0 1 0-.707m-9.9-7.07a.5.5 0 0 1 0 .707L5.05 12.757a.5.5 0 0 1-.707.707L2.929 12.05a.5.5 0 0 1 .707-.707m9.9 0a.5.5 0 0 1 0 .707L14.95 12.757a.5.5 0 0 1-.707.707L12.828 12.05a.5.5 0 0 1 .707-.707"/>
                     </svg>
                     <span id="current-weather">Loading...</span>
                     <span>(Kuala Lumpur)</span>
                 </div>
-                 <!-- Additional Timezones Grid -->
+                 
+                 <!-- NEW: Hourly Forecast Container (MOVED) -->
+                 <div id="hourly-forecast-container">
+                     <span class="text-xs opacity-70">Loading forecast...</span>
+                 </div>
+                 
+                 <!-- NEW: Sunset info -->
+                 <div id="sunset-info">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
+                       <path d="M7.646 4.854a.5.5 0 0 0 .708 0l1.5-1.5a.5.5 0 0 0-.708-.708L8 3.793 6.854 2.646a.5.5 0 1 0-.708.708l1.5 1.5zM1.707 8.293A.5.5 0 0 1 2 8h12a.5.5 0 0 1 .293.707l-4 4a.5.5 0 0 1-.586 0l-4-4a.5.5 0 0 1-.007-.707zM14 6H2a.5.5 0 0 1 0-1h12a.5.5 0 0 1 0 1"/>
+                     </svg>
+                     <span>Sunset will be at...</span>
+                 </div>
+
+                 <!-- Additional Timezones Grid (MOVED) -->
                  <div class="timezone-grid">
                     <span>UTC:</span> <span id="utc-time">...</span>
                     <span>EST:</span> <span id="est-time">...</span>
@@ -844,12 +882,11 @@
                     **Three.js:** JavaScript library used for creating and rendering the interactive 3D environment and models.
                     <br><a href="https://threejs.org" target="_blank" class="text-blue-400 hover:underline">https://threejs.org</a>
                 </li>
-                <!-- === ADDED REFERENCE === -->
+                 <!-- NEW: Added PNG Reference -->
                 <li>
-                    **Bouncing PNG Asset (Pochita):** Image used for the bouncing logo effect on sub-pages.
+                    **Pochita PNG:** Sourced from pnganime.com for the bouncing logo effect.
                     <br><a href="https://pnganime.com/gallery/puchita-png" target="_blank" class="text-blue-400 hover:underline">https://pnganime.com/gallery/puchita-png</a>
                 </li>
-                <!-- === END OF ADDED REFERENCE === -->
                 <li>
                     **Sketchfab Models (Reference for styling/display, actual files uploaded):**
                     <ul class="mt-1 ml-4 space-y-1 list-disc list-inside">
@@ -1497,8 +1534,9 @@
         const logo = document.getElementById('bouncing-logo');
         let x = 100; // Initial X
         let y = 100; // Initial Y
-        let vx = 1;  // Speed X
-        let vy = 1;  // Speed Y
+        // UPDATED: Changed speed to 1.5
+        let vx = 1.5;  // Speed X
+        let vy = 1.5;  // Speed Y
         let rotation = 0; // NEW: Add rotation variable
         let logoAnimationId = null;
 
@@ -1545,11 +1583,9 @@
                  // Reset position
                  x = Math.random() * (window.innerWidth - 100);
                  y = Math.random() * (window.innerHeight - 100);
-                 
-                 // === UPDATED SPEED ===
-                 vx = (Math.random() > 0.5 ? 1 : -1) * 1.5; // Was 3
-                 vy = (Math.random() > 0.5 ? 1 : -1) * 1.5; // Was 3
-                 // === END OF UPDATE ===
+                 // Reset speed
+                 vx = (Math.random() > 0.5 ? 1 : -1) * 1.5; // UPDATED: Speed 1.5
+                 vy = (Math.random() > 0.5 ? 1 : -1) * 1.5; // UPDATED: Speed 1.5
                  
                  // Set initial transform before starting animation
                  if (logo) {
@@ -1580,8 +1616,10 @@
              
              // Time and Weather setup moved here
              updateTime(); 
-             setInterval(updateTime, 60000); 
-             fetchWeather();
+             setInterval(updateTime, 60000); // Update time every minute
+             
+             fetchWeather(); // Fetch weather on load
+             setInterval(fetchWeather, 120000); // UPDATED: Re-fetch weather every 2 minutes
 
              // --- NEW LOCATION FOR UI ANIMATIONS ---
              // Run UI animations immediately on load, don't wait for 3D models
@@ -1593,6 +1631,7 @@
              // --- END NEW LOCATION ---
              
              // --- REMOVED: GEMINI API EVENT LISTENERS ---
+             // setupGeminiListeners();
         });
 
 
@@ -1676,25 +1715,27 @@
 
         // --- LIVE Weather Fetch Logic (Open-Meteo) ---
         
-        // Icons for WMO Weather codes
+        // UPDATED: Icons for WMO Weather codes (Filled, modern style)
         const weatherIcons = {
-            sunny: "M12 18a6 6 0 100-12 6 6 0 000 12zM12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41",
-            cloudy: "M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z",
-            rainy: "M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10zM16 14v1M12 16v1M8 14v1", 
-            thunder: "M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10zM13 11l-4 6h3l-1 4" 
-            // Add more icons as needed (snow, fog, etc.)
+            sunny: "M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m-5-6.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m11 0a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5m-9.757-2.121a.5.5 0 0 1 .707 0l1.414 1.414a.5.5 0 1 1-.707.707L3.243 5.05a.5.5 0 0 1 0-.707m9.9 9.9a.5.5 0 0 1 .707 0l1.414 1.414a.5.5 0 1 1-.707.707L12.757 14.95a.5.5 0 0 1 0-.707m-9.9-7.07a.5.5 0 0 1 0 .707L5.05 12.757a.5.5 0 0 1-.707.707L2.929 12.05a.5.5 0 0 1 .707-.707m9.9 0a.5.5 0 0 1 0 .707L14.95 12.757a.5.5 0 0 1-.707.707L12.828 12.05a.5.5 0 0 1 .707-.707",
+            nightClear: "M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792 0 1.57-.122a.77.77 0 0 1 .979.81A8.96 8.96 0 0 1 8.998 16a8.993 8.993 0 0 1-8.7-9.347A8.96 8.96 0 0 1 6 .278",
+            cloudy: "M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973",
+            nightCloudy: "M11.473 11a5 5 0 0 0-8.72-.99A3.5 3.5 0 0 0 3.5 13H9.5a3 3 0 0 0 .405-5.973.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 1.39.37 2.678 1.005 3.666",
+            rainy: "M4.158 12.025a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973", 
+            thunder: "M5.301 3.164a.5.5 0 0 1 .59.037L9.5 5.5h2.02a.5.5 0 0 1 .454.72l-2 4a.5.5 0 0 1-.884-.437L9.08 7.5H7.5a.5.5 0 0 1-.454-.72l2-4a.5.5 0 0 1 .255-.276M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973",
+            sunset: "M7.646 4.854a.5.5 0 0 0 .708 0l1.5-1.5a.5.5 0 0 0-.708-.708L8 3.793 6.854 2.646a.5.5 0 1 0-.708.708l1.5 1.5zM1.707 8.293A.5.5 0 0 1 2 8h12a.5.5 0 0 1 .293.707l-4 4a.5.5 0 0 1-.586 0l-4-4a.5.5 0 0 1-.007-.707zM14 6H2a.5.5 0 0 1 0-1h12a.5.5 0 0 1 0 1"
         };
 
         // Maps WMO codes to text and icon
-        function getWeatherDetails(code) {
+        function getWeatherDetails(code, isDay = 1) { // UPDATED: Added isDay flag
             // WMO Weather interpretation codes
             const codes = {
-                0: { text: "Clear sky", icon: weatherIcons.sunny },
-                1: { text: "Mainly clear", icon: weatherIcons.sunny },
-                2: { text: "Partly cloudy", icon: weatherIcons.cloudy },
-                3: { text: "Overcast", icon: weatherIcons.cloudy },
-                45: { text: "Fog", icon: weatherIcons.cloudy },
-                48: { text: "Depositing rime fog", icon: weatherIcons.cloudy },
+                0: { text: "Clear sky", icon: isDay ? weatherIcons.sunny : weatherIcons.nightClear },
+                1: { text: "Mainly clear", icon: isDay ? weatherIcons.sunny : weatherIcons.nightClear },
+                2: { text: "Partly cloudy", icon: isDay ? weatherIcons.cloudy : weatherIcons.nightCloudy },
+                3: { text: "Overcast", icon: isDay ? weatherIcons.cloudy : weatherIcons.nightCloudy },
+                45: { text: "Fog", icon: isDay ? weatherIcons.cloudy : weatherIcons.nightCloudy },
+                48: { text: "Depositing rime fog", icon: isDay ? weatherIcons.cloudy : weatherIcons.nightCloudy },
                 51: { text: "Light drizzle", icon: weatherIcons.rainy },
                 53: { text: "Moderate drizzle", icon: weatherIcons.rainy },
                 55: { text: "Dense drizzle", icon: weatherIcons.rainy },
@@ -1709,17 +1750,20 @@
                 99: { text: "Thunderstorm, heavy hail", icon: weatherIcons.thunder }
                 // Add more codes as needed
             };
-            return codes[code] || { text: "Clear", icon: weatherIcons.sunny }; // Default to sunny
+            return codes[code] || { text: "Clear", icon: isDay ? weatherIcons.sunny : weatherIcons.nightClear }; // Default to clear
         }
 
         async function fetchWeather() {
             const weatherElement = document.getElementById('current-weather');
-            const weatherIconPath = document.getElementById('weather-icon').querySelector('path');
+            const weatherIcon = document.getElementById('weather-icon'); // Get the SVG element
+            const forecastContainer = document.getElementById('hourly-forecast-container');
+            const sunsetElement = document.getElementById('sunset-info').querySelector('span'); // NEW
             
             // Kuala Lumpur coordinates
             const lat = 3.139;
             const lon = 101.6869;
-            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code`;
+            // UPDATED URL to include apparent_temperature, is_day, and sunset
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code,is_day&hourly=temperature_2m,weather_code,precipitation_probability,is_day&daily=sunset&forecast_days=1&timezone=Asia%2FKuala_Lumpur`;
 
             try {
                 const response = await fetch(url);
@@ -1728,24 +1772,115 @@
                 }
                 const data = await response.json();
                 
-                const temp = data.current.temperature_2m;
+                // --- Process CURRENT weather ---
+                const temp = Math.round(data.current.temperature_2m);
+                const feelsLikeTemp = Math.round(data.current.apparent_temperature); // NEW: Get "feels like"
                 const weatherCode = data.current.weather_code;
-                const weatherDetails = getWeatherDetails(weatherCode);
+                const isDay = data.current.is_day; // NEW: Get is_day (1 for day, 0 for night)
+                const weatherDetails = getWeatherDetails(weatherCode, isDay); // UPDATED: Pass isDay
 
                 if (weatherElement) {
-                    weatherElement.textContent = `${temp}°C, ${weatherDetails.text}`;
+                    // UPDATED: Include "feels like" temperature
+                    weatherElement.textContent = `${temp}°C (Feels ${feelsLikeTemp}°), ${weatherDetails.text}`;
                 }
-                if (weatherIconPath) {
-                    weatherIconPath.setAttribute('d', weatherDetails.icon);
+                if (weatherIcon) {
+                    // UPDATED: Set innerHTML to the new icon path
+                    weatherIcon.innerHTML = `<path d="${weatherDetails.icon}"/>`;
+                }
+                
+                // --- Process SUNSET ---
+                const sunsetTimeStr = data.daily.sunset[0];
+                const sunsetDate = new Date(sunsetTimeStr);
+                // UPDATED: Format sunset time to 12-hr AM/PM
+                const sunsetTime = sunsetDate.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                }); // e.g., "6:56 PM"
+                
+                if (sunsetElement) {
+                    sunsetElement.textContent = `Sunset will be at ${sunsetTime}`; // e.g., "Sunset will be at 6:56 PM"
+                }
+                const sunsetHour = sunsetDate.getHours(); // e.g., 18
+
+                // --- Process HOURLY forecast ---
+                if (forecastContainer) {
+                    forecastContainer.innerHTML = ''; // Clear previous forecast
+                    const hourlyData = data.hourly;
+                    
+                    // --- FIX: Find the index for the *next* hour ---
+                    const now = new Date();
+                    // Find the first hour in the forecast that is *after* the current time
+                    let startIndex = hourlyData.time.findIndex(time => new Date(time) > now);
+                    if (startIndex === -1) {
+                         // If all hours are in the past (unlikely), default to last 6
+                         startIndex = Math.max(0, hourlyData.time.length - 6);
+                    }
+                    // --- End of FIX ---
+                    
+                    // Show 6 hours of forecast
+                    const endIndex = Math.min(startIndex + 6, hourlyData.time.length);
+
+                    for (let i = startIndex; i < endIndex; i++) {
+                        const timeStr = hourlyData.time[i];
+                        const hourDate = new Date(timeStr);
+                        const hour = hourDate.getHours();
+                        
+                        // UPDATED: Format time to 12-hour AM/PM (e.g., "7:00 PM")
+                        // FIX: Change to `let`
+                        let timeLabel = hourDate.toLocaleTimeString('en-US', {
+                            hour: 'numeric',
+                            minute: '2-digit', // Added minutes
+                            hour12: true
+                        }); // e.g., "7:00 PM"
+
+                        const hourlyTemp = Math.round(hourlyData.temperature_2m[i]);
+                        const hourlyCode = hourlyData.weather_code[i];
+                        const hourlyPrecip = hourlyData.precipitation_probability[i];
+                        const hourlyIsDay = hourlyData.is_day[i]; // NEW: Get hourly is_day
+                        let hourlyWeatherDetails = getWeatherDetails(hourlyCode, hourlyIsDay); // UPDATED: Pass hourly is_day
+                        
+                        const item = document.createElement('div');
+                        item.className = 'forecast-item';
+                        
+                        let tempLabel = `${hourlyTemp}°`;
+                        let iconPath = hourlyWeatherDetails.icon;
+
+                        // --- NEW: Sunset Logic ---
+                        // Check if this hour is the sunset hour
+                        if (hour === sunsetHour) {
+                             timeLabel = sunsetTime; // Use exact sunset time e.g., "6:56 PM"
+                             tempLabel = "Sunset";
+                             iconPath = weatherIcons.sunset; // Use sunset icon
+                        }
+
+                        item.innerHTML = `
+                            <span>${timeLabel}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="${iconPath}" />
+                            </svg>
+                            <span class="temp">${tempLabel}</span>
+                            <span class="precip">${hourlyPrecip}%</span>
+                        `;
+                        forecastContainer.appendChild(item);
+                    }
                 }
 
-            } catch (error) {
+            } catch (error)
+             {
                 console.error("Failed to fetch live weather:", error);
                 if (weatherElement) {
                     weatherElement.textContent = "Weather unavailable";
                 }
-                 if (weatherIconPath) {
-                    weatherIconPath.setAttribute('d', weatherIcons.sunny); // Default icon on error
+                 if (weatherIcon) {
+                    // UPDATED: Set innerHTML to the default icon path on error
+                    weatherIcon.innerHTML = `<path d="${weatherIcons.sunny}"/>`;
+                }
+                if (forecastContainer) {
+                    forecastContainer.innerHTML = '<span class="text-xs text-red-500 opacity-70">Forecast unavailable</span>';
+                }
+                if (sunsetElement) {
+                    sunsetElement.textContent = "Sunset time unavailable";
                 }
             }
         }
