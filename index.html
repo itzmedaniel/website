@@ -1788,8 +1788,8 @@
             // Kuala Lumpur coordinates
             const lat = 3.139;
             const lon = 101.6869;
-            // UPDATED URL to include apparent_temperature, is_day, and sunset
-            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code,is_day&hourly=temperature_2m,weather_code,precipitation_probability,is_day&daily=sunset&forecast_days=1&timezone=Asia%2FKuala_Lumpur`;
+            // UPDATED URL to include apparent_temperature, is_day, sunset, and forecast_days=2
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,weather_code,is_day&hourly=temperature_2m,weather_code,precipitation_probability,is_day&daily=sunset&forecast_days=2&timezone=Asia%2FKuala_Lumpur`;
 
             try {
                 const response = await fetch(url);
@@ -1815,7 +1815,7 @@
                 }
                 
                 // --- Process SUNSET ---
-                const sunsetTimeStr = data.daily.sunset[0];
+                const sunsetTimeStr = data.daily.sunset[0]; // Use today's sunset
                 const sunsetDate = new Date(sunsetTimeStr);
                 // UPDATED: Format sunset time to 24-hour (e.g., "18:56")
                 const sunsetTime = sunsetDate.toLocaleTimeString('en-US', {
@@ -1843,13 +1843,13 @@
                     // Find the first hour in the forecast that is *after* the current time
                     let startIndex = hourlyData.time.findIndex(time => new Date(time) > now);
                     if (startIndex === -1) {
-                         // If all hours are in the past (unlikely), default to last 6
-                         startIndex = Math.max(0, hourlyData.time.length - 6);
+                         // If all hours are in the past (unlikely), default to last 5
+                         startIndex = Math.max(0, hourlyData.time.length - 5);
                     }
                     // --- End of FIX ---
                     
-                    // Show 6 hours of forecast
-                    const endIndex = Math.min(startIndex + 6, hourlyData.time.length);
+                    // Show 5 hours of forecast
+                    const endIndex = Math.min(startIndex + 5, hourlyData.time.length);
 
                     for (let i = startIndex; i < endIndex; i++) {
                         const timeStr = hourlyData.time[i];
