@@ -867,6 +867,12 @@
                     **Three.js:** JavaScript library used for creating and rendering the interactive 3D environment and models.
                     <br><a href="https://threejs.org" target="_blank" class="text-blue-400 hover:underline">https://threejs.org</a>
                 </li>
+                <!-- === ADDED REFERENCE === -->
+                <li>
+                    **Bouncing PNG Asset (Pochita):** Image used for the bouncing logo effect on sub-pages.
+                    <br><a href="https://pnganime.com/gallery/puchita-png" target="_blank" class="text-blue-400 hover:underline">https://pnganime.com/gallery/puchita-png</a>
+                </li>
+                <!-- === END OF ADDED REFERENCE === -->
                 <li>
                     **Sketchfab Models (Reference for styling/display, actual files uploaded):**
                     <ul class="mt-1 ml-4 space-y-1 list-disc list-inside">
@@ -1514,8 +1520,8 @@
         const logo = document.getElementById('bouncing-logo');
         let x = 100; // Initial X
         let y = 100; // Initial Y
-        let vx = 3;  // Speed X
-        let vy = 3;  // Speed Y
+        let vx = 1;  // Speed X
+        let vy = 1;  // Speed Y
         let rotation = 0; // NEW: Add rotation variable
         let logoAnimationId = null;
 
@@ -1562,9 +1568,11 @@
                  // Reset position
                  x = Math.random() * (window.innerWidth - 100);
                  y = Math.random() * (window.innerHeight - 100);
-                 // Reset speed
-                 vx = (Math.random() > 0.5 ? 1 : -1) * 3;
-                 vy = (Math.random() > 0.5 ? 1 : -1) * 3;
+                 
+                 // === UPDATED SPEED ===
+                 vx = (Math.random() > 0.5 ? 1 : -1) * 1.5; // Was 3
+                 vy = (Math.random() > 0.5 ? 1 : -1) * 1.5; // Was 3
+                 // === END OF UPDATE ===
                  
                  // Set initial transform before starting animation
                  if (logo) {
