@@ -5,6 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daniel's Project</title>
+    
+    <!-- === UPDATED FAVICON LINKS (using full raw GitHub URLs) === -->
+    <link rel="apple-touch-icon" sizes="180x180" href="httpsl://raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/favicon-16x16.png">
+    <link rel="manifest" href="https://raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/site.webmanifest">
+    <link rel="shortcut icon" href="https://raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/favicon.ico">
+    <!-- === END OF FAVICON LINKS === -->
+
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -177,12 +186,12 @@
             padding: 8rem 2rem 2rem 2rem; /* Increased top padding */
             overflow-y: auto; /* Enable scrolling */
              /* Background is now mostly for fallback or non-blur browsers */
-             background-color: #f3f4f6; /* Light gray background */
+             background-color: transparent; /* UPDATED: Was #f3f4f6 */
              color: #111827; 
              transition: background-color 0.3s, color 0.3s;
         }
         .dark .page-content {
-             background-color: #000000; /* Dark background */
+             background-color: transparent; /* UPDATED: Was #000000 */
              color: #f0f0f0; 
         }
 
@@ -241,6 +250,17 @@
         }
 
         /* --- START: FRONT PAGE CHROME METALLIC SHINE EFFECT (ULTRA SHARP CHROME) --- */
+        
+        /* OPTIMIZATION: Converted shine effect to pure CSS for performance */
+        @keyframes shine-anim-light {
+            0% { background-position-x: 100%; }
+            100% { background-position-x: -300%; }
+        }
+        @keyframes shine-anim-dark {
+            0% { background-position-x: 100%; }
+            100% { background-position-x: -300%; }
+        }
+
         #animated-title {
             white-space: nowrap;
             color: #111827; 
@@ -265,6 +285,9 @@
             -webkit-text-fill-color: transparent;
             background-position-x: 100%; 
             transition: color 0.3s;
+            
+            /* CSS Animation */
+            animation: shine-anim-light 12s linear infinite;
         }
 
         .dark #animated-title {
@@ -287,6 +310,9 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-position-x: 100%; 
+            
+            /* CSS Animation */
+            animation: shine-anim-dark 12s linear infinite;
         }
         /* --- END: FRONT PAGE CHROME METALLIC SHINE EFFECT --- */
 
@@ -409,6 +435,53 @@
             border-color: #60a5fa;
             box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3);
         }
+        
+        /* NEW: Gemini Button Style */
+        .gemini-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            cursor: pointer;
+            background-color: #8b5cf6; /* Violet */
+            color: white;
+            border: 1px solid transparent;
+        }
+        .gemini-btn:hover {
+            background-color: #7c3aed;
+        }
+        .gemini-btn:disabled {
+            opacity: 0.5;
+            cursor: wait;
+        }
+
+        /* NEW: Gemini Results Box */
+        .gemini-results {
+            margin-top: 1.5rem; /* mt-6 */
+            padding: 1rem; /* p-4 */
+            border-radius: 0.5rem; /* rounded-lg */
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        .dark .gemini-results {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .gemini-results h2 {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .gemini-results ul {
+            list-style-type: disc;
+            list-style-position: inside;
+            padding-left: 0.5rem;
+        }
+        .gemini-results li {
+            margin-bottom: 0.5rem;
+        }
+
 
         .social-icon-link {
             width: 3rem;
@@ -462,6 +535,39 @@
              font-weight: 600; /* font-semibold */
              margin-bottom: 0.5rem; /* mb-2 */
         }
+        
+        /* --- START: Bouncing Logo Styles --- */
+        #bouncing-logo {
+            position: fixed;
+            width: 100px; /* Logo size */
+            height: 100px; /* Logo size */
+            z-index: 12; /* UPDATED: Back to 12 (behind page content) */
+            pointer-events: none; /* Don't block clicks */
+            
+            /* === UPDATED URL HERE (using raw GitHub link) === */
+            background-image: url('https://raw.githubusercontent.com/itzmedaniel/website/main/pochita.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            
+            /* Start hidden */
+            display: none; 
+            
+            /* NEW: Blend mode and opacity for background effect */
+            opacity: 0.8; /* UPDATED: Was 0.2, now much more visible */
+            /* REMOVED: mix-blend-mode: multiply; */
+        }
+
+        .dark #bouncing-logo {
+            /* REMOVED: mix-blend-mode: screen; */
+            /* This rule is no longer needed */
+        }
+        
+        /* @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        } */
+        /* --- END: Bouncing Logo Styles --- */
 
 
     </style>
@@ -475,6 +581,9 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
     </button>
+    
+    <!-- NEW: Bouncing Logo element -->
+    <div id="bouncing-logo"></div>
 
     <!-- Main Content Wrapper -->
     <div id="main-content">
@@ -624,6 +733,22 @@
             </ul>
             <!-- END: Project List -->
 
+            <!-- === NEW: GEMINI AI PROJECT SUGGESTER === -->
+            <div class="pt-6 mt-8 border-t border-gray-200 dark:border-gray-600">
+                <h2 class="text-2xl font-semibold text-center">Need Inspiration?</h2>
+                <p class="mb-4 text-center text-gray-600 dark:text-gray-300">Let AI suggest new projects based on my work!</p>
+                <div class="text-center">
+                    <button id="gemini-project-btn" class="gemini-btn">
+                        ✨ Suggest Related Projects
+                    </button>
+                </div>
+                <div id="gemini-project-results" class="hidden gemini-results">
+                    <!-- AI content will be injected here -->
+                </div>
+            </div>
+            <!-- === END: GEMINI AI PROJECT SUGGESTER === -->
+
+
              <!-- NOTE: The 'More project content...' ensures the main page scrollbar appears for the entire page content, as requested. -->
              <p class="mt-10 text-lg" style="min-height: 50vh;">Additional project content here to ensure the main page scrolls...</p> 
              <p class="mt-10 text-lg">End of Project page.</p>
@@ -671,6 +796,19 @@
                 <form action="https://formspree.io/f/meopqwan" method="POST" class="pt-4 space-y-4">
                     
                     <input type="email" name="_replyto" placeholder="Your Email" class="contact-input" required>
+                    
+                    <!-- === NEW: GEMINI AI MESSAGE DRAFTER === -->
+                    <div class="space-y-2">
+                         <label for="draft-topic" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Need help writing? (Optional)</label>
+                         <div class="flex flex-col gap-2 sm:flex-row">
+                            <input id="draft-topic" type="text" placeholder="e.g., A collaboration idea" class="flex-grow contact-input">
+                            <button id="gemini-draft-btn" type="button" class="w-full gemini-btn sm:w-auto">
+                                ✨ Generate Draft
+                            </button>
+                         </div>
+                    </div>
+                    <!-- === END: GEMINI AI MESSAGE DRAFTER === -->
+                    
                     <textarea name="message" placeholder="Your Message" rows="5" class="resize-none contact-input" required></textarea>
                     
                     <button type="submit" class="w-full py-2 font-semibold text-white transition-colors duration-200 bg-blue-600 rounded-lg hover:bg-blue-700">
@@ -713,6 +851,10 @@
                     **AI Development Assistance:** This website's animations, UI structure, and complex logic were written with the assistance of a large language model (LLM), which acted as a development partner.
                     <br><small class="opacity-70">Acknowledged: Google Gemini</small>
                 </li>
+                 <li>
+                    **Live Weather Data:** Live weather conditions provided by Open-Meteo.
+                    <br><a href="https://open-meteo.com/" target="_blank" class="text-blue-400 hover:underline">https://open-meteo.com/</a>
+                </li>
                 <li>
                     **Apple Website Design:** Inspiration for the overall aesthetic, especially the glassy, translucent UI elements.
                     <br><a href="https://www.apple.com/macbook-pro" target="_blank" class="text-blue-400 hover:underline">https://www.apple.com/macbook-pro</a>
@@ -723,13 +865,13 @@
                 </li>
                 <li>
                     **Three.js:** JavaScript library used for creating and rendering the interactive 3D environment and models.
-                    <br><a href="httpshttps://threejs.org" target="_blank" class="text-blue-400 hover:underline">https://threejs.org</a>
+                    <br><a href="https://threejs.org" target="_blank" class="text-blue-400 hover:underline">https://threejs.org</a>
                 </li>
                 <li>
                     **Sketchfab Models (Reference for styling/display, actual files uploaded):**
                     <ul class="mt-1 ml-4 space-y-1 list-disc list-inside">
                         <li>Black Hole Concept: <a href="https://sketchfab.com/3d-models/black-hole-e410da98b1e5445eae2acafaaa53587d" target="_blank" class="text-blue-400 hover:underline">https://sketchfab.com/3d-models/black-hole-e410da98b1e5445eae2acafaaa53587d</a></li>
-                        <li>MacBook Model: <a href="httpshttps://www.apple.com/macbook-pro" target="_blank" class="text-blue-400 hover:underline">https://www.apple.com/macbook-pro</a>
+                        <li>MacBook Model: <a href="https://www.apple.com/macbook-pro" target="_blank" class="text-blue-400 hover:underline">https://www.apple.com/macbook-pro</a>
                     </ul>
                 </li>
             </ul>
@@ -997,7 +1139,10 @@
 
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); 
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
+            
+            // OPTIMIZATION: Cap pixel ratio at 2 for performance
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); 
+            
             container.appendChild(renderer.domElement);
 
             // --- Lighting ---
@@ -1119,10 +1264,6 @@
             
         } // End of init()
         
-        // --- REMOVED ANTI-INSPECTION FUNCTION ---
-        /* The anti-inspection function was removed to prevent page breakage in the Canvas environment. */
-        
-
         function onWindowResize() {
             if (camera) {
                 camera.aspect = window.innerWidth / window.innerHeight;
@@ -1130,6 +1271,8 @@
             }
             if (renderer) {
                 renderer.setSize(window.innerWidth, window.innerHeight);
+                // Re-apply pixel ratio cap on resize
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             }
         }
 
@@ -1168,9 +1311,6 @@
 
         let activePageElement = null; // Track the currently visible page
 
-        // --- 
-        // --- FIX 1: Corrected the showHomePage function ---
-        // ---
         function showHomePage() {
             if (mainContent) mainContent.classList.remove('hidden');
             if (homeButton) homeButton.classList.add('hidden');
@@ -1195,20 +1335,20 @@
                      anime.remove(headingAnimationInstances[pageId].targets);
                      delete headingAnimationInstances[pageId];
                  }
-            }); // <-- This closing tag was missing and replaced with junk code.
-
-            // The misplaced error code and extra '}' were removed from here.
+            });
 
             // --- Trigger UI animation on returning home ---
              animateUIIn();
-             animateShine(); // Restart shine animation
              
-             // --- 
-             // --- FIX 2: RESTART THE 3D RENDER LOOP ---
-             // --- This is the fix for the frozen animation.
+             // RESTART THE 3D RENDER LOOP
              if (!animationFrameId) {
                 animate();
              }
+             
+             // --- NEW: Stop bouncing logo ---
+             // Only stop if it's not the about me page (which is what activePageElement tracks)
+             // On second thought, just always stop it when returning home.
+             stopBouncingLogo();
         }
         
 
@@ -1227,7 +1367,7 @@
              currentPageElement.classList.remove('hidden');
              currentPageElement.scrollTop = 0; // Scroll to top
 
-             // Stop animation
+             // Stop 3D animation
              if (animationFrameId) {
                  cancelAnimationFrame(animationFrameId);
                  animationFrameId = null;
@@ -1252,6 +1392,16 @@
              
              // --- Run the Character Slide animation (Replacing the old line-clip/color-wave) ---
              animateHeadingCharSlide(pageId);
+             
+             // --- UPDATED: Start bouncing logo for ALL pages ---
+             startBouncingLogo();
+             /*
+             if (pageId === 'aboutMe') {
+                startBouncingLogo();
+             } else {
+                stopBouncingLogo(); // Ensure it's stopped for other pages
+             }
+             */
         }
 
         if(links.aboutMe) links.aboutMe.addEventListener('click', () => showPage('aboutMe'));
@@ -1357,21 +1507,83 @@
             heading.classList.add('split-applied');
         }
         
-        // --- NEW: Front Page Title Shine Effect ---
-        function animateShine() {
-            const titleElement = document.getElementById('animated-title');
-            if (!titleElement) return;
+        // --- OPTIMIZATION: Removed JS-based animateShine() function ---
+        
+        
+        // --- START: Bouncing Logo Logic ---
+        const logo = document.getElementById('bouncing-logo');
+        let x = 100; // Initial X
+        let y = 100; // Initial Y
+        let vx = 3;  // Speed X
+        let vy = 3;  // Speed Y
+        let rotation = 0; // NEW: Add rotation variable
+        let logoAnimationId = null;
 
-            // Apply the background animation to create the moving shine effect
-            // Duration increased to 12000ms (12 seconds) for a slower, more dramatic effect.
-            anime({
-                targets: titleElement,
-                backgroundPositionX: ['100%', '-300%'], // Animate from right to far left
-                easing: 'linear',
-                duration: 12000, 
-                loop: true
-            });
+        function animateLogo() {
+            if (!logo) return; // Guard against missing element
+            const bounds = document.body.getBoundingClientRect();
+            const logoWidth = logo.offsetWidth; // Use offsetWidth for layout size
+            const logoHeight = logo.offsetHeight;
+            
+            x += vx;
+            y += vy;
+            rotation += 2; // NEW: Increment rotation for spinning effect
+
+            // Bounce logic
+            if (x + logoWidth > bounds.width) {
+                x = bounds.width - logoWidth;
+                vx *= -1;
+            }
+            if (x < 0) {
+                x = 0;
+                vx *= -1;
+            }
+            if (y + logoHeight > bounds.height) {
+                y = bounds.height - logoHeight;
+                vy *= -1;
+            }
+            if (y < 0) {
+                y = 0;
+                vy *= -1;
+            }
+
+            // Use translate for performance
+            // UPDATED: Add rotate() to the transform
+            logo.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg)`; 
+            
+            logoAnimationId = requestAnimationFrame(animateLogo);
         }
+        
+        function startBouncingLogo() {
+             if (logo) {
+                logo.style.display = 'block';
+             }
+             if (!logoAnimationId) {
+                 // Reset position
+                 x = Math.random() * (window.innerWidth - 100);
+                 y = Math.random() * (window.innerHeight - 100);
+                 // Reset speed
+                 vx = (Math.random() > 0.5 ? 1 : -1) * 3;
+                 vy = (Math.random() > 0.5 ? 1 : -1) * 3;
+                 
+                 // Set initial transform before starting animation
+                 if (logo) {
+                    // UPDATED: Add rotate() to the initial transform
+                    rotation = 0; // Reset rotation
+                    logo.style.transform = `translate(${x}px, ${y}px) rotate(0deg)`;
+                 }
+                 animateLogo();
+             }
+        }
+        
+        function stopBouncingLogo() {
+            if (logo) logo.style.display = 'none';
+            if (logoAnimationId) {
+                cancelAnimationFrame(logoAnimationId);
+                logoAnimationId = null;
+            }
+        }
+        // --- END: Bouncing Logo Logic ---
 
 
         // --- Main Execution ---
@@ -1391,27 +1603,29 @@
              const savedTheme = localStorage.getItem('theme') || 'system';
              applyTheme(savedTheme); // This will call animateUIIn
             
-             setTimeout(animateShine, 400); 
+             // --- OPTIMIZATION: Removed call to JS-based animateShine() ---
              setTimeout(animateWord, 500);
              // --- END NEW LOCATION ---
+             
+             // --- NEW: GEMINI API EVENT LISTENERS ---
+             setupGeminiListeners();
         });
 
 
         // --- anime.js Subtitle Animation (Remains the same) ---
-        // const textWrapper = document.getElementById('anime-text-target'); // <-- BUG: This runs too early
         const words = [
             'HTML.',
             'JavaScript.',
             'anime.js.',
             'Three.js.',
-            'Tailwind CSS.' /* <-- FIXED: Removed "and" */
+            'Tailwind CSS.'
         ];
         let wordIndex = 0;
         let animationTimeout;
 
         function animateWord() {
-            const textWrapper = document.getElementById('anime-text-target'); // <-- FIX: Find the element *inside* the function
-            clearTimeout(animationTimeout); // Clear previous timeout if any
+            const textWrapper = document.getElementById('anime-text-target'); 
+            clearTimeout(animationTimeout); 
             if (!textWrapper) return; 
             
             const word = words[wordIndex];
@@ -1448,11 +1662,6 @@
               });
         }
         
-        // --- RESTORED: Title Animation Logic (REMOVED) ---
-        // function wrapLetters(element) { ... }
-        // function animateTitle() { ... }
-
-
         // --- Timezone Update Logic ---
         const timeElement = document.getElementById('current-time');
         const utcTimeElement = document.getElementById('utc-time');
@@ -1481,44 +1690,239 @@
              }
         }
 
-        // --- Weather Fetch Logic (Stable Localized Simulation) ---
+        // --- LIVE Weather Fetch Logic (Open-Meteo) ---
         
+        // Icons for WMO Weather codes
         const weatherIcons = {
             sunny: "M12 18a6 6 0 100-12 6 6 0 000 12zM12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41",
             cloudy: "M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z",
             rainy: "M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10zM16 14v1M12 16v1M8 14v1", 
             thunder: "M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10zM13 11l-4 6h3l-1 4" 
+            // Add more icons as needed (snow, fog, etc.)
         };
 
-        function getWeatherIcon(conditionText) {
-            conditionText = conditionText.toLowerCase();
-            if (conditionText.includes('sun') || conditionText.includes('clear')) return weatherIcons.sunny;
-            if (conditionText.includes('rain') || conditionText.includes('shower')) return weatherIcons.rainy;
-            if (conditionText.includes('thunder') || conditionText.includes('storm')) return weatherIcons.thunder;
-            if (conditionText.includes('cloud') || conditionText.includes('hazy') || conditionText.includes('partly')) return weatherIcons.cloudy;
-            return weatherIcons.sunny; 
+        // Maps WMO codes to text and icon
+        function getWeatherDetails(code) {
+            // WMO Weather interpretation codes
+            const codes = {
+                0: { text: "Clear sky", icon: weatherIcons.sunny },
+                1: { text: "Mainly clear", icon: weatherIcons.sunny },
+                2: { text: "Partly cloudy", icon: weatherIcons.cloudy },
+                3: { text: "Overcast", icon: weatherIcons.cloudy },
+                45: { text: "Fog", icon: weatherIcons.cloudy },
+                48: { text: "Depositing rime fog", icon: weatherIcons.cloudy },
+                51: { text: "Light drizzle", icon: weatherIcons.rainy },
+                53: { text: "Moderate drizzle", icon: weatherIcons.rainy },
+                55: { text: "Dense drizzle", icon: weatherIcons.rainy },
+                61: { text: "Slight rain", icon: weatherIcons.rainy },
+                63: { text: "Moderate rain", icon: weatherIcons.rainy },
+                66: { text: "Light freezing rain", icon: weatherIcons.rainy },
+                80: { text: "Slight rain showers", icon: weatherIcons.rainy },
+                81: { text: "Moderate rain showers", icon: weatherIcons.rainy },
+                82: { text: "Violent rain showers", icon: weatherIcons.rainy },
+                95: { text: "Thunderstorm", icon: weatherIcons.thunder },
+                96: { text: "Thunderstorm, slight hail", icon: weatherIcons.thunder },
+                99: { text: "Thunderstorm, heavy hail", icon: weatherIcons.thunder }
+                // Add more codes as needed
+            };
+            return codes[code] || { text: "Clear", icon: weatherIcons.sunny }; // Default to sunny
         }
 
-        function fetchWeather() {
+        async function fetchWeather() {
             const weatherElement = document.getElementById('current-weather');
             const weatherIconPath = document.getElementById('weather-icon').querySelector('path');
-
-            // --- Localized Simulation for Kuala Lumpur ---
-            const simulations = [
-                { temp: '32°C', condition: 'Hot & Hazy', icon: weatherIcons.sunny },
-                { temp: '26°C', condition: 'Heavy Rain', icon: weatherIcons.rainy },
-                { temp: '28°C', condition: 'Partly Cloudy', icon: weatherIcons.cloudy },
-                { temp: '25°C', condition: 'Thunderstorm', icon: weatherIcons.thunder },
-                { temp: '30°C', condition: 'Mostly Sunny', icon: weatherIcons.sunny }
-            ];
-
-            const simulation = simulations[Math.floor(Math.random() * simulations.length)];
             
-            if (weatherElement) weatherElement.textContent = `${simulation.temp}, ${simulation.condition}`;
-            if (weatherIconPath) weatherIconPath.setAttribute('d', simulation.icon);
+            // Kuala Lumpur coordinates
+            const lat = 3.139;
+            const lon = 101.6869;
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`Weather API error: ${response.statusText}`);
+                }
+                const data = await response.json();
+                
+                const temp = data.current.temperature_2m;
+                const weatherCode = data.current.weather_code;
+                const weatherDetails = getWeatherDetails(weatherCode);
+
+                if (weatherElement) {
+                    weatherElement.textContent = `${temp}°C, ${weatherDetails.text}`;
+                }
+                if (weatherIconPath) {
+                    weatherIconPath.setAttribute('d', weatherDetails.icon);
+                }
+
+            } catch (error) {
+                console.error("Failed to fetch live weather:", error);
+                if (weatherElement) {
+                    weatherElement.textContent = "Weather unavailable";
+                }
+                 if (weatherIconPath) {
+                    weatherIconPath.setAttribute('d', weatherIcons.sunny); // Default icon on error
+                }
+            }
         }
+        
+        // --- NEW: GEMINI API FUNCTIONS ---
+        
+        /**
+         * A helper function to fetch with exponential backoff.
+         */
+        const fetchWithRetry = async (url, options, retries = 3, delay = 1000) => {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    // Don't retry on client errors (4xx), only server errors (5xx) or network failures
+                    if (response.status >= 400 && response.status < 500) {
+                        console.error(`Gemini API Error: ${response.status} ${response.statusText}`);
+                        const errorBody = await response.json();
+                        console.error("Error details:", errorBody);
+                        throw new Error(`Client error: ${response.statusText}`);
+                    }
+                    // For 5xx errors, throw to trigger retry
+                    throw new Error(`Server error: ${response.statusText}`);
+                }
+                return response.json();
+            } catch (error) {
+                if (retries > 0) {
+                    // Don't log retries as errors
+                    // console.log(`Retrying... (${retries} attempts left)`);
+                    await new Promise(res => setTimeout(res, delay));
+                    return fetchWithRetry(url, options, retries - 1, delay * 2);
+                } else {
+                    console.error("Gemini API call failed after multiple retries:", error);
+                    throw error;
+                }
+            }
+        };
+
+        /**
+         * Calls the Gemini API to generate content.
+         * @param {string} userPrompt - The user's prompt.
+         * @param {string} [systemPrompt] - (Optional) The system instruction.
+         * @returns {Promise<string|null>} The generated text or null on failure.
+         */
+        async function callGeminiAPI(userPrompt, systemPrompt = "") {
+            const apiKey = ""; // API key is handled by the environment
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+            };
+
+            if (systemPrompt) {
+                payload.systemInstruction = {
+                    parts: [{ text: systemPrompt }]
+                };
+            }
+
+            try {
+                const result = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const candidate = result.candidates?.[0];
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    return candidate.content.parts[0].text;
+                } else {
+                    console.error("Invalid response structure from Gemini API:", result);
+                    return null;
+                }
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                return null;
+            }
+        }
+        
+        /**
+         * Sets up event listeners for the new Gemini UI elements.
+         */
+        function setupGeminiListeners() {
+            // --- Project Page Listener ---
+            const projectBtn = document.getElementById('gemini-project-btn');
+            const projectResults = document.getElementById('gemini-project-results');
+            
+            if (projectBtn && projectResults) {
+                projectBtn.addEventListener('click', async () => {
+                    projectBtn.disabled = true;
+                    projectBtn.innerHTML = "✨ Thinking...";
+                    projectResults.classList.remove('hidden');
+                    projectResults.innerHTML = "<p>Generating ideas...</p>";
+                    
+                    try {
+                        const existingProjectText = document.querySelector('.project-item p')?.textContent;
+                        if (!existingProjectText) {
+                            throw new Error("Could not find project text.");
+                        }
+                        
+                        const prompt = `Based on my project: "${existingProjectText}", suggest 3 new, related project ideas I could work on. For each idea, give a short 1-2 sentence description.`;
+                        const systemPrompt = "You are a helpful and creative tech mentor. Format your response as an H2 title 'Project Ideas' followed by an unordered list (ul/li) in HTML. Make the project titles bold.";
+                        
+                        const response = await callGeminiAPI(prompt, systemPrompt);
+                        
+                        if (response) {
+                            projectResults.innerHTML = response;
+                        } else {
+                            throw new Error("No response from API.");
+                        }
+                        
+                    } catch (error) {
+                        console.error(error);
+                        projectResults.innerHTML = `<p class="font-semibold text-red-500">Error: Could not generate project ideas at this time.</p>`;
+                    } finally {
+                        projectBtn.disabled = false;
+                        projectBtn.innerHTML = "✨ Suggest Related Projects";
+                    }
+                });
+            }
+            
+            // --- Contact Page Listener ---
+            const draftBtn = document.getElementById('gemini-draft-btn');
+            const draftTopicInput = document.getElementById('draft-topic');
+            const contactTextarea = document.querySelector('textarea[name="message"]');
+            
+            if (draftBtn && draftTopicInput && contactTextarea) {
+                draftBtn.addEventListener('click', async () => {
+                    const topic = draftTopicInput.value.trim();
+                    
+                    if (!topic) {
+                        contactTextarea.value = ""; // Clear textarea
+                        contactTextarea.placeholder = "Please enter a topic above to generate a draft.";
+                        return;
+                    }
+                    
+                    draftBtn.disabled = true;
+                    draftBtn.innerHTML = "✨ Drafting...";
+                    contactTextarea.placeholder = "Generating AI draft...";
+                    
+                    try {
+                        const prompt = `Draft a professional and friendly contact message to 'Daniel' about the following topic: "${topic}". Keep it concise (2-3 sentences), start with "Hi Daniel,", and sign off with "[Your Name]".`;
+                        const systemPrompt = "You are a helpful communication assistant. Output *only* the text of the message draft, with no other formatting, titles, or explanations.";
+                        
+                        const response = await callGeminiAPI(prompt, systemPrompt);
+                        
+                        if (response) {
+                            contactTextarea.value = response;
+                        } else {
+                            throw new Error("No response from API.");
+                        }
+                        
+                    } catch (error) {
+                        console.error(error);
+                        contactTextarea.placeholder = "Error: Could not draft message.";
+                    } finally {
+                        draftBtn.disabled = false;
+                        draftBtn.innerHTML = "✨ Generate Draft";
+                    }
+                });
+            }
+        }
+
     </script>
 </body>
 </html>
-
-// --- END OF FILE ---
