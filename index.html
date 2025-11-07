@@ -219,8 +219,13 @@
         }
         .dark .page-content {
              background-color: transparent; /* UPDATED: Was #000000 */
-             color: #f0f0f0; 
+             color: #f0f0f0;
         }
+
+        /* Contact page terminal background */
+        .contact-terminal-bg { position: absolute; inset: 0; z-index: 0; }
+        .contact-bouncing-logo { position: absolute; width: 100px; height: 100px; z-index: 1; pointer-events: none; background-image: url('https://raw.githubusercontent.com/itzmedaniel/website/main/pochita.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.8; }
+        .page-content .glass-panel { position: relative; z-index: 2; }
 
         .home-button {
             position: fixed;
@@ -811,12 +816,14 @@
 
     <!-- Contact Page Content (initially hidden) -->
     <div id="contact-page" class="hidden page-content text-container">
+        <div id="contact-terminal-bg" class="contact-terminal-bg"></div>
+        <div id="contact-bouncing-logo" class="contact-bouncing-logo"></div>
         <!-- Width class max-w-6xl -->
         <div class="bouncing-orb" id="orb-contact"></div> 
         <div class="max-w-6xl mx-auto glass-panel"> 
             <!-- ADDED CLASS: animated-heading -->
             <h1 class="mb-6 text-4xl font-bold text-center animated-heading md:text-5xl">Contact</h1>
-            
+
             <div class="flex flex-col space-y-6">
                 <!-- Social Icons -->
                 <div class="flex justify-center py-4 space-x-6 border-t border-b border-gray-200 dark:border-gray-600">
@@ -930,6 +937,9 @@
 
         <!-- Main 3D Logic -->
     <script type="module">
+        import React from 'react';
+        import { createRoot } from 'react-dom/client';
+        import LiquidChrome from './LiquidChrome.jsx';
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -943,6 +953,28 @@
         let isBlackHoleLoaded = false;
 
         let animationFrameId = null;
+
+        // React mount for LiquidChrome on Contact page
+        let contactReactRoot = null;
+        function mountLiquidChrome() {
+            const slot = document.getElementById('contact-terminal-bg');
+            if (!slot) return;
+            if (!contactReactRoot) {
+                contactReactRoot = createRoot(slot);
+            }
+            contactReactRoot.render(React.createElement(LiquidChrome, {
+                baseColor: [0.1, 0.1, 0.1],
+                speed: 0.2,
+                amplitude: 0.6,
+                interactive: false
+            }));
+        }
+        function unmountLiquidChrome() {
+            if (contactReactRoot) {
+                contactReactRoot.unmount();
+                contactReactRoot = null;
+            }
+        }
 
         // Theme colors for 3D scene
         const themes = {
@@ -1391,6 +1423,8 @@
             });
 
             // --- Trigger UI animation on returning home ---
+             unmountLiquidChrome();
+             selectLogoForPage('home');
              animateUIIn();
              
              // RESTART THE 3D RENDER LOOP
@@ -1447,6 +1481,8 @@
              animateHeadingCharSlide(pageId);
              
              // --- UPDATED: Start bouncing logo for ALL pages ---
+             if (pageId === 'contact') { mountLiquidChrome(); } else { unmountLiquidChrome(); }
+             selectLogoForPage(pageId);
              startBouncingLogo();
         }
 
@@ -1557,7 +1593,18 @@
         
         
         // --- START: Bouncing Logo Logic ---
-        const logo = document.getElementById('bouncing-logo');
+        let logo = null;
+        function selectLogoForPage(pageId) {
+            if (pageId === 'contact') {
+                logo = document.getElementById('contact-bouncing-logo');
+                const globalLogo = document.getElementById('bouncing-logo');
+                if (globalLogo) globalLogo.style.display = 'none';
+            } else {
+                logo = document.getElementById('bouncing-logo');
+                const contactLogo = document.getElementById('contact-bouncing-logo');
+                if (contactLogo) contactLogo.style.display = 'none';
+            }
+        }
         let x = 100; // Initial X
         let y = 100; // Initial Y
         // UPDATED: Changed speed to 1.5
