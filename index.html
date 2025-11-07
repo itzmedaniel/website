@@ -224,7 +224,8 @@
 
         /* Contact page terminal background */
         .contact-terminal-bg { position: absolute; inset: 0; z-index: 0; }
-        .page-content .glass-panel { position: relative; z-index: 1; }
+        .contact-bouncing-logo { position: absolute; width: 100px; height: 100px; z-index: 1; pointer-events: none; background-image: url('https://raw.githubusercontent.com/itzmedaniel/website/main/pochita.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.8; }
+        .page-content .glass-panel { position: relative; z-index: 2; }
 
         .home-button {
             position: fixed;
@@ -816,6 +817,7 @@
     <!-- Contact Page Content (initially hidden) -->
     <div id="contact-page" class="hidden page-content text-container">
         <div id="contact-terminal-bg" class="contact-terminal-bg"></div>
+        <div id="contact-bouncing-logo" class="contact-bouncing-logo"></div>
         <!-- Width class max-w-6xl -->
         <div class="bouncing-orb" id="orb-contact"></div> 
         <div class="max-w-6xl mx-auto glass-panel"> 
@@ -962,9 +964,9 @@
             }
             contactReactRoot.render(React.createElement(LiquidChrome, {
                 baseColor: [0.1, 0.1, 0.1],
-                speed: 1,
+                speed: 0.2,
                 amplitude: 0.6,
-                interactive: true
+                interactive: false
             }));
         }
         function unmountLiquidChrome() {
@@ -1422,6 +1424,7 @@
 
             // --- Trigger UI animation on returning home ---
              unmountLiquidChrome();
+             selectLogoForPage('home');
              animateUIIn();
              
              // RESTART THE 3D RENDER LOOP
@@ -1479,6 +1482,7 @@
              
              // --- UPDATED: Start bouncing logo for ALL pages ---
              if (pageId === 'contact') { mountLiquidChrome(); } else { unmountLiquidChrome(); }
+             selectLogoForPage(pageId);
              startBouncingLogo();
         }
 
@@ -1589,7 +1593,18 @@
         
         
         // --- START: Bouncing Logo Logic ---
-        const logo = document.getElementById('bouncing-logo');
+        let logo = null;
+        function selectLogoForPage(pageId) {
+            if (pageId === 'contact') {
+                logo = document.getElementById('contact-bouncing-logo');
+                const globalLogo = document.getElementById('bouncing-logo');
+                if (globalLogo) globalLogo.style.display = 'none';
+            } else {
+                logo = document.getElementById('bouncing-logo');
+                const contactLogo = document.getElementById('contact-bouncing-logo');
+                if (contactLogo) contactLogo.style.display = 'none';
+            }
+        }
         let x = 100; // Initial X
         let y = 100; // Initial Y
         // UPDATED: Changed speed to 1.5
