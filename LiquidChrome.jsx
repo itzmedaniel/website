@@ -1,148 +1,161 @@
-import React, { useEffect, useRef } from 'react';
+import { useRef, useEffect } from 'react';
+import { Renderer, Program, Mesh, Triangle } from 'ogl';
 
-function clamp(v, min, max) { return Math.min(max, Math.max(min, v)); }
-function lerp(a, b, t) { return a + (b - a) * t; }
+import './LiquidChrome.css';
 
-export default function LiquidChrome({
-  baseColor = [0.1, 0.1, 0.1], // [r,g,b] 0..1
-  speed = 1,
-  amplitude = 0.6, // 0..1 movement/intensity
-  interactive = true
-}) {
-  const canvasRef = useRef(null);
-  const rafRef = useRef(null);
-  const roRef = useRef(null);
-  const stateRef = useRef({ t: 0, mouse: { x: 0, y: 0 }, size: { w: 0, h: 0 } });
+export const LiquidChrome = ({
+  baseColor = [0.1, 0.1, 0.1],
+  speed = 0.2,
+  amplitude = 0.3,
+  frequencyX = 3,
+  frequencyY = 3,
+  interactive = true,
+  ...props
+}) => {
+  const containerRef = useRef(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    if (!containerRef.current) return;
+
+    const container = containerRef.current;
+    const renderer = new Renderer({ antialias: true });
+    const gl = renderer.gl;
+    gl.clearColor(1, 1, 1, 1);
+
+    const vertexShader = `
+      attribute vec2 position;
+      attribute vec2 uv;
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = vec4(position, 0.0, 1.0);
+      }
+    `;
+
+    const fragmentShader = `
+      precision highp float;
+      uniform float uTime;
+      uniform vec3 uResolution;
+      uniform vec3 uBaseColor;
+      uniform float uAmplitude;
+      uniform float uFrequencyX;
+      uniform float uFrequencyY;
+      uniform vec2 uMouse;
+      varying vec2 vUv;
+
+      vec4 renderImage(vec2 uvCoord) {
+          vec2 fragCoord = uvCoord * uResolution.xy;
+          vec2 uv = (2.0 * fragCoord - uResolution.xy) / min(uResolution.x, uResolution.y);
+
+          for (float i = 1.0; i < 10.0; i++){
+              uv.x += uAmplitude / i * cos(i * uFrequencyX * uv.y + uTime + uMouse.x * 3.14159);
+              uv.y += uAmplitude / i * cos(i * uFrequencyY * uv.x + uTime + uMouse.y * 3.14159);
+          }
+
+          vec2 diff = (uvCoord - uMouse);
+          float dist = length(diff);
+          float falloff = exp(-dist * 20.0);
+          float ripple = sin(10.0 * dist - uTime * 2.0) * 0.03;
+          uv += (diff / (dist + 0.0001)) * ripple * falloff;
+
+          vec3 color = uBaseColor / abs(sin(uTime - uv.y - uv.x));
+          return vec4(color, 1.0);
+      }
+
+      void main() {
+          vec4 col = vec4(0.0);
+          int samples = 0;
+          for (int i = -1; i <= 1; i++){
+              for (int j = -1; j <= 1; j++){
+                  vec2 offset = vec2(float(i), float(j)) * (1.0 / min(uResolution.x, uResolution.y));
+                  col += renderImage(vUv + offset);
+                  samples++;
+              }
+          }
+          gl_FragColor = col / float(samples);
+      }
+    `;
+
+    const geometry = new Triangle(gl);
+    const program = new Program(gl, {
+      vertex: vertexShader,
+      fragment: fragmentShader,
+      uniforms: {
+        uTime: { value: 0 },
+        uResolution: {
+          value: new Float32Array([gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height])
+        },
+        uBaseColor: { value: new Float32Array(baseColor) },
+        uAmplitude: { value: amplitude },
+        uFrequencyX: { value: frequencyX },
+        uFrequencyY: { value: frequencyY },
+        uMouse: { value: new Float32Array([0, 0]) }
+      }
+    });
+    const mesh = new Mesh(gl, { geometry, program });
 
     function resize() {
-      const parent = canvas.parentElement;
-      const w = parent.clientWidth;
-      const h = parent.clientHeight;
-      canvas.width = Math.max(1, Math.floor(w * dpr));
-      canvas.height = Math.max(1, Math.floor(h * dpr));
-      canvas.style.width = w + 'px';
-      canvas.style.height = h + 'px';
-      stateRef.current.size = { w: canvas.width, h: canvas.height };
+      const scale = 1;
+      renderer.setSize(container.offsetWidth * scale, container.offsetHeight * scale);
+      const resUniform = program.uniforms.uResolution.value;
+      resUniform[0] = gl.canvas.width;
+      resUniform[1] = gl.canvas.height;
+      resUniform[2] = gl.canvas.width / gl.canvas.height;
     }
-
+    window.addEventListener('resize', resize);
     resize();
-    const ro = new ResizeObserver(resize);
-    ro.observe(canvas.parentElement);
-    roRef.current = ro;
 
-    const onMove = (e) => {
-      if (!interactive) return;
-      const rect = canvas.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width * 2 - 1;
-      const y = (e.clientY - rect.top) / rect.height * 2 - 1;
-      stateRef.current.mouse.x = clamp(x, -1, 1);
-      stateRef.current.mouse.y = clamp(y, -1, 1);
-    };
-    if (interactive) window.addEventListener('pointermove', onMove);
-
-    const blobs = Array.from({ length: 16 }).map((_, i) => ({
-      phaseX: Math.random() * Math.PI * 2,
-      phaseY: Math.random() * Math.PI * 2,
-      freqX: 0.6 + Math.random() * 0.8,
-      freqY: 0.6 + Math.random() * 0.8,
-      baseR: 40 + Math.random() * 80,
-      weight: 0.5 + Math.random()
-    }));
-
-    function fillBase() {
-      const { w, h } = stateRef.current.size;
-      const r = Math.round(clamp(baseColor[0], 0, 1) * 255);
-      const g = Math.round(clamp(baseColor[1], 0, 1) * 255);
-      const b = Math.round(clamp(baseColor[2], 0, 1) * 255);
-      // Subtle vertical gradient to enhance depth
-      const grad = ctx.createLinearGradient(0, 0, 0, h);
-      grad.addColorStop(0, `rgb(${r},${g},${b})`);
-      grad.addColorStop(1, `rgb(${Math.max(0,r-10)},${Math.max(0,g-10)},${Math.max(0,b-10)})`);
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, w, h);
+    function handleMouseMove(event) {
+      const rect = container.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width;
+      const y = 1 - (event.clientY - rect.top) / rect.height;
+      const mouseUniform = program.uniforms.uMouse.value;
+      mouseUniform[0] = x;
+      mouseUniform[1] = y;
     }
 
-    function drawBlobs(t) {
-      const { w, h } = stateRef.current.size;
-      const cx = w * 0.5;
-      const cy = h * 0.5;
-      const A = Math.min(w, h) * (0.25 + 0.35 * clamp(amplitude, 0, 1));
-      const mouse = stateRef.current.mouse;
-      const mx = interactive ? mouse.x * A * 0.3 : 0;
-      const my = interactive ? mouse.y * A * 0.3 : 0;
-
-      ctx.globalCompositeOperation = 'lighter';
-      for (let i = 0; i < blobs.length; i++) {
-        const b = blobs[i];
-        const x = cx + Math.sin(b.phaseX + t * b.freqX * speed + i * 0.3) * A + mx;
-        const y = cy + Math.cos(b.phaseY + t * b.freqY * speed + i * 0.2) * A * 0.6 + my;
-        const radius = b.baseR * (0.8 + 0.6 * Math.sin(t * 0.9 + i));
-
-        const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
-        grad.addColorStop(0.0, 'rgba(255,255,255,0.65)');
-        grad.addColorStop(0.35, 'rgba(220,220,220,0.35)');
-        grad.addColorStop(0.75, 'rgba(120,120,120,0.10)');
-        grad.addColorStop(1.0, 'rgba(0,0,0,0.0)');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fill();
+    function handleTouchMove(event) {
+      if (event.touches.length > 0) {
+        const touch = event.touches[0];
+        const rect = container.getBoundingClientRect();
+        const x = (touch.clientX - rect.left) / rect.width;
+        const y = 1 - (touch.clientY - rect.top) / rect.height;
+        const mouseUniform = program.uniforms.uMouse.value;
+        mouseUniform[0] = x;
+        mouseUniform[1] = y;
       }
-      ctx.globalCompositeOperation = 'source-over';
     }
 
-    function drawSpecular(t) {
-      const { w, h } = stateRef.current.size;
-      const highlight = ctx.createLinearGradient(0, 0, w, h);
-      const power = 0.18;
-      highlight.addColorStop(0.0, `rgba(255,255,255,${power})`);
-      highlight.addColorStop(0.25, 'rgba(255,255,255,0.0)');
-      highlight.addColorStop(0.75, 'rgba(255,255,255,0.0)');
-      highlight.addColorStop(1.0, `rgba(255,255,255,${power * 0.6})`);
-      ctx.globalCompositeOperation = 'overlay';
-      ctx.fillStyle = highlight;
-      ctx.fillRect(0, 0, w, h);
-      ctx.globalCompositeOperation = 'source-over';
+    if (interactive) {
+      container.addEventListener('mousemove', handleMouseMove);
+      container.addEventListener('touchmove', handleTouchMove);
     }
 
-    function drawVignette() {
-      const { w, h } = stateRef.current.size;
-      const g = ctx.createRadialGradient(w * 0.5, h * 0.5, Math.min(w, h) * 0.4, w * 0.5, h * 0.5, Math.max(w, h) * 0.75);
-      g.addColorStop(0, 'rgba(0,0,0,0)');
-      g.addColorStop(1, 'rgba(0,0,0,0.35)');
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, w, h);
+    let animationId;
+    function update(t) {
+      animationId = requestAnimationFrame(update);
+      program.uniforms.uTime.value = t * 0.001 * speed;
+      renderer.render({ scene: mesh });
     }
+    animationId = requestAnimationFrame(update);
 
-    function frame(tms) {
-      const t = (tms || 0) * 0.001;
-      stateRef.current.t = t;
-      const { w, h } = stateRef.current.size;
-      ctx.clearRect(0, 0, w, h);
-      fillBase();
-      drawBlobs(t);
-      drawSpecular(t);
-      drawVignette();
-      rafRef.current = requestAnimationFrame(frame);
-    }
-
-    rafRef.current = requestAnimationFrame(frame);
+    container.appendChild(gl.canvas);
 
     return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      if (roRef.current) roRef.current.disconnect();
-      if (interactive) window.removeEventListener('pointermove', onMove);
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', resize);
+      if (interactive) {
+        container.removeEventListener('mousemove', handleMouseMove);
+        container.removeEventListener('touchmove', handleTouchMove);
+      }
+      if (gl.canvas.parentElement) {
+        gl.canvas.parentElement.removeChild(gl.canvas);
+      }
+      gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
-  }, [baseColor[0], baseColor[1], baseColor[2], speed, amplitude, interactive]);
+  }, [baseColor, speed, amplitude, frequencyX, frequencyY, interactive]);
 
-  return (
-    <div style={{ position: 'absolute', inset: 0 }}>
-      <canvas ref={canvasRef} />
-    </div>
-  );
-}
+  return <div ref={containerRef} className="liquidChrome-container" {...props} />;
+};
+
+export default LiquidChrome;
