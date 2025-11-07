@@ -224,7 +224,7 @@
 
         /* Contact page terminal background */
         .contact-terminal-bg { position: absolute; inset: 0; z-index: 0; }
-        .contact-bouncing-logo { position: fixed; width: 100px; height: 100px; z-index: 1; pointer-events: none; background-image: url('https://raw.githubusercontent.com/itzmedaniel/website/main/pochita.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.8; }
+        .contact-bouncing-logo { position: fixed; top: 0; left: 0; width: 100px; height: 100px; z-index: 1; pointer-events: none; background-image: url('https://raw.githubusercontent.com/itzmedaniel/website/main/pochita.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.8; }
         .page-content .glass-panel { position: relative; z-index: 2; }
 
         .home-button {
@@ -590,6 +590,8 @@
         /* --- START: Bouncing Logo Styles --- */
         #bouncing-logo {
             position: fixed;
+            top: 0;
+            left: 0;
             width: 100px; /* Logo size */
             height: 100px; /* Logo size */
             z-index: 12; /* UPDATED: Back to 12 (behind page content) */
@@ -1996,6 +1998,5 @@
     </script>
 </body>
 </html>
-
 
 
