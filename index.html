@@ -33,11 +33,11 @@
     <!-- === END: LINK PREVIEW / SOCIAL EMBED TAGS === -->
     
     <!-- === UPDATED FAVICON LINKS (using full raw GitHub URLs) === -->
-    <link rel="apple-touch-icon" sizes="180x180" href="https.raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="https.raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="https.raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/favicon-16x16.png">
-    <link rel="manifest" href="https.raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/site.webmanifest">
-    <link rel="shortcut icon" href="https.raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/favicon-16x16.png">
+    <link rel="manifest" href="https://raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/site.webmanifest">
+    <link rel="shortcut icon" href="https://raw.githubusercontent.com/itzmedaniel/website/main/favicon_io/favicon.ico">
     <!-- === END OF FAVICON LINKS === -->
 
     <!-- Load Tailwind CSS -->
@@ -224,7 +224,7 @@
 
         /* Contact page terminal background */
         .contact-terminal-bg { position: absolute; inset: 0; z-index: 0; }
-        .contact-bouncing-logo { position: absolute; width: 100px; height: 100px; z-index: 1; pointer-events: none; background-image: url('https://raw.githubusercontent.com/itzmedaniel/website/main/pochita.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.8; }
+        .contact-bouncing-logo { position: fixed; width: 100px; height: 100px; z-index: 1; pointer-events: none; background-image: url('https://raw.githubusercontent.com/itzmedaniel/website/main/pochita.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.8; }
         .page-content .glass-panel { position: relative; z-index: 2; }
 
         .home-button {
@@ -1615,7 +1615,7 @@
 
         function animateLogo() {
             if (!logo) return; // Guard against missing element
-            const bounds = document.body.getBoundingClientRect();
+            const bounds = { width: window.innerWidth, height: window.innerHeight };
             const logoWidth = logo.offsetWidth; // Use offsetWidth for layout size
             const logoHeight = logo.offsetHeight;
             
@@ -1624,19 +1624,19 @@
             rotation += 2; // NEW: Increment rotation for spinning effect
 
             // Bounce logic
-            if (x + logoWidth > bounds.width) {
+            if (x + logoWidth >= bounds.width) {
                 x = bounds.width - logoWidth;
                 vx *= -1;
             }
-            if (x < 0) {
+            if (x <= 0) {
                 x = 0;
                 vx *= -1;
             }
-            if (y + logoHeight > bounds.height) {
+            if (y + logoHeight >= bounds.height) {
                 y = bounds.height - logoHeight;
                 vy *= -1;
             }
-            if (y < 0) {
+            if (y <= 0) {
                 y = 0;
                 vy *= -1;
             }
@@ -1996,3 +1996,6 @@
     </script>
 </body>
 </html>
+
+
+
