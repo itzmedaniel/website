@@ -937,7 +937,7 @@
     <script type="module">
         import React from 'react';
         import { createRoot } from 'react-dom/client';
-        import FaultyTerminal from './FaultyTerminal.jsx';
+        import LiquidChrome from './LiquidChrome.jsx';
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -952,35 +952,22 @@
 
         let animationFrameId = null;
 
-        // React mount for FaultyTerminal on Contact page
+        // React mount for LiquidChrome on Contact page
         let contactReactRoot = null;
-        function mountFaultyTerminal() {
+        function mountLiquidChrome() {
             const slot = document.getElementById('contact-terminal-bg');
             if (!slot) return;
             if (!contactReactRoot) {
                 contactReactRoot = createRoot(slot);
             }
-            contactReactRoot.render(React.createElement(FaultyTerminal, {
-                scale: 1.5,
-                gridMul: [2, 1],
-                digitSize: 1.2,
-                timeScale: 1,
-                pause: false,
-                scanlineIntensity: 1,
-                glitchAmount: 1,
-                flickerAmount: 1,
-                noiseAmp: 1,
-                chromaticAberration: 0,
-                dither: 0,
-                curvature: 0,
-                tint: '#ffffff',
-                mouseReact: true,
-                mouseStrength: 0.5,
-                pageLoadAnimation: false,
-                brightness: 1
+            contactReactRoot.render(React.createElement(LiquidChrome, {
+                baseColor: [0.1, 0.1, 0.1],
+                speed: 1,
+                amplitude: 0.6,
+                interactive: true
             }));
         }
-        function unmountFaultyTerminal() {
+        function unmountLiquidChrome() {
             if (contactReactRoot) {
                 contactReactRoot.unmount();
                 contactReactRoot = null;
@@ -1434,7 +1421,7 @@
             });
 
             // --- Trigger UI animation on returning home ---
-             unmountFaultyTerminal();
+             unmountLiquidChrome();
              animateUIIn();
              
              // RESTART THE 3D RENDER LOOP
@@ -1491,7 +1478,7 @@
              animateHeadingCharSlide(pageId);
              
              // --- UPDATED: Start bouncing logo for ALL pages ---
-             if (pageId === 'contact') { mountFaultyTerminal(); } else { unmountFaultyTerminal(); }
+             if (pageId === 'contact') { mountLiquidChrome(); } else { unmountLiquidChrome(); }
              startBouncingLogo();
         }
 
