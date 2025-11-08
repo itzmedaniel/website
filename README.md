@@ -1,3 +1,7 @@
+This github repo isnt perfect, which has a lot of unused (well just changed up not using it) file did not get removed.
+
+
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
