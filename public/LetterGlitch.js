@@ -144,17 +144,18 @@ class LetterGlitch {
     const parent = canvas.parentElement;
     if (!parent) return;
 
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2); // OPTIMIZED: Cap DPR at 2
+    const scale = 0.75; // OPTIMIZED: Render at 75% resolution
     const rect = parent.getBoundingClientRect();
 
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
+    canvas.width = rect.width * dpr * scale;
+    canvas.height = rect.height * dpr * scale;
 
     canvas.style.width = `${rect.width}px`;
     canvas.style.height = `${rect.height}px`;
 
     if (this.context) {
-      this.context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      this.context.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
     }
 
     const { columns, rows } = this.calculateGrid(rect.width, rect.height);

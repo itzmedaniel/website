@@ -55,14 +55,18 @@ class Plasma {
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(this.container);
     
-    // Mouse tracking
+    // Mouse tracking with throttling for performance
     if (this.options.mouseInteractive) {
+      let mouseMoveThrottle = null;
       this.handleMouseMove = (e) => {
+        if (mouseMoveThrottle) return; // OPTIMIZED: Throttle mouse events
+        mouseMoveThrottle = setTimeout(() => mouseMoveThrottle = null, 16); // ~60fps
+        
         const rect = this.container.getBoundingClientRect();
         this.mousePos.x = e.clientX - rect.left;
         this.mousePos.y = e.clientY - rect.top;
       };
-      this.container.addEventListener('mousemove', this.handleMouseMove);
+      this.container.addEventListener('mousemove', this.handleMouseMove, { passive: true }); // OPTIMIZED: Passive listener
     }
     
     // Create shader program
@@ -77,13 +81,14 @@ class Plasma {
   resize() {
     const rect = this.container.getBoundingClientRect();
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const width = Math.max(1, Math.floor(rect.width));
-    const height = Math.max(1, Math.floor(rect.height));
+    const scale = 0.75; // OPTIMIZED: Render at 75% resolution for better performance
+    const width = Math.max(1, Math.floor(rect.width * scale));
+    const height = Math.max(1, Math.floor(rect.height * scale));
     
     this.canvas.width = width * dpr;
     this.canvas.height = height * dpr;
-    this.canvas.style.width = width + 'px';
-    this.canvas.style.height = height + 'px';
+    this.canvas.style.width = rect.width + 'px'; // Keep display size full
+    this.canvas.style.height = rect.height + 'px';
     
     this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
     

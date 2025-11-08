@@ -82,11 +82,14 @@ class LiquidChrome {
   }
   
   resize() {
-    const width = Math.max(1, Math.floor(this.container.offsetWidth));
-    const height = Math.max(1, Math.floor(this.container.offsetHeight));
+    const scale = 0.75; // OPTIMIZED: Render at 75% resolution
+    const width = Math.max(1, Math.floor(this.container.offsetWidth * scale));
+    const height = Math.max(1, Math.floor(this.container.offsetHeight * scale));
     
     this.canvas.width = width;
     this.canvas.height = height;
+    this.canvas.style.width = '100%'; // Keep display size full
+    this.canvas.style.height = '100%';
     
     this.gl.viewport(0, 0, width, height);
     

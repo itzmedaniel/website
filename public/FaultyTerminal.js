@@ -60,8 +60,9 @@ class FaultyTerminal {
   
   resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    this.canvas.width = this.container.offsetWidth * dpr;
-    this.canvas.height = this.container.offsetHeight * dpr;
+    const scale = 0.75; // OPTIMIZED: Render at 75% resolution
+    this.canvas.width = this.container.offsetWidth * dpr * scale;
+    this.canvas.height = this.container.offsetHeight * dpr * scale;
     this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
   }
   

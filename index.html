@@ -1,4 +1,30 @@
 <!DOCTYPE html>
+<!-- 
+    ═══════════════════════════════════════════════════════════════════
+    █▀▀▄ █▀▀█ █▀▀▄ ─▀─ █▀▀ █───   █── █▀▀█ █▀▀▄ █▀▀▀
+    █──█ █▄▄█ █──█ ▀█▀ █▀▀ █───   █── █──█ █──█ █─▀█
+    ▀▀▀─ ▀──▀ ▀──▀ ▀▀▀ ▀▀▀ ▀▀▀   ▀▀▀ ▀▀▀▀ ▀──▀ ▀▀▀▀
+    ═══════════════════════════════════════════════════════════════════
+    
+    ⚠️  COPYRIGHT NOTICE ⚠️
+    
+    Website Design & Code © 2025 Daniel Long
+    All Rights Reserved.
+    
+    This website's design, animations, and code are the intellectual 
+    property of Daniel Long. Unauthorized copying, modification, or 
+    distribution of this code is strictly prohibited.
+    
+    GitHub: https://github.com/itzmedaniel
+    Contact: daniellong1109@gmail.com
+    
+    If you wish to use any portion of this code, please contact me
+    for permission.
+    
+    Built with: Three.js, anime.js, Vite, Tailwind CSS
+    Background effects: Reactbits.dev (converted to vanilla JS)
+    ═══════════════════════════════════════════════════════════════════
+-->
 <!-- The class="dark" will be added/removed by JS -->
 <html lang="en">
 <head>
@@ -511,12 +537,14 @@
             z-index: -2; /* Behind the orb */
             opacity: 1; /* INCREASED: Full opacity for better visibility in light mode */
             pointer-events: none; /* Don't block interactions */
+            will-change: opacity; /* OPTIMIZED: GPU acceleration hint */
         }
         
         .terminal-background canvas {
             width: 100%;
             height: 100%;
             display: block;
+            will-change: transform; /* OPTIMIZED: GPU acceleration for canvas */
         }
         
         /* Debug helper - remove after testing */
@@ -635,12 +663,41 @@
         }
         
         /* --- END: Bouncing Logo Styles --- */
+        
+        /* --- START: Signature/Watermark Styles --- */
+        .signature-watermark {
+            position: fixed;
+            bottom: 10px;
+            right: 15px;
+            z-index: 9999;
+            font-size: 11px;
+            font-family: 'Courier New', monospace;
+            opacity: 0.6;
+            pointer-events: none;
+            user-select: none;
+            color: #666;
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+            transition: opacity 0.3s;
+        }
+        
+        .dark .signature-watermark {
+            color: #aaa;
+            text-shadow: 0 0 3px rgba(255, 255, 255, 0.2);
+        }
+        
+        .signature-watermark:hover {
+            opacity: 0.9;
+        }
+        /* --- END: Signature/Watermark Styles --- */
 
 
     </style>
 </head>
 <!-- Removed padding from body -->
 <body class="min-h-screen overflow-hidden">
+
+    <!-- Signature Watermark -->
+    <div class="signature-watermark">© 2025 Daniel Long</div>
 
     <!-- Home Button (initially hidden) -->
     <button id="home-button" class="hidden home-button" title="Back to Home">
@@ -1307,7 +1364,8 @@
 
             // --- Starfield Background ---
             const starVertices = [];
-            for (let i = 0; i < 10000; i++) {
+            // OPTIMIZED: Reduced from 10000 to 5000 stars for better performance
+            for (let i = 0; i < 5000; i++) {
                 const x = THREE.MathUtils.randFloatSpread(20000);
                 const y = THREE.MathUtils.randFloatSpread(20000);
                 const z = THREE.MathUtils.randFloatSpread(20000);
@@ -1319,7 +1377,8 @@
                  color: 0xffffff,
                  size: 2.5,
                  transparent: true,
-                 opacity: 0.8
+                 opacity: 0.8,
+                 sizeAttenuation: false // OPTIMIZED: Disable size attenuation for performance
             });
             starField = new THREE.Points(starGeometry, starMaterial);
             scene.add(starField);
@@ -1331,6 +1390,9 @@
             controls.enableZoom = true; 
             controls.autoRotate = true; 
             controls.autoRotateSpeed = 0.8;
+            controls.enablePan = false; // OPTIMIZED: Disable panning
+            controls.minDistance = 5; // OPTIMIZED: Limit zoom distance
+            controls.maxDistance = 50; // OPTIMIZED: Limit zoom distance
             
             // --- Event Listeners ---
             window.addEventListener('resize', onWindowResize);
@@ -1372,8 +1434,9 @@
                 controls.update();
             }
 
+            // OPTIMIZED: Reduce starfield rotation speed and only update if visible
             if (starField && starField.visible) {
-                starField.rotation.y += 0.0001;
+                starField.rotation.y += 0.00005; // Reduced from 0.0001
             }
             
             if (renderer && scene && camera) {
@@ -1397,7 +1460,8 @@
             contact: document.getElementById('contact-link'),
             reference: document.getElementById('reference-link')
         };
-
+// daniel
+// long
         let activePageElement = null; // Track the currently visible page
 
         function showHomePage() {
@@ -1437,7 +1501,8 @@
                 letterGlitchInstance.destroy();
                 letterGlitchInstance = null;
             }
-            
+// si
+// xian            
             // Destroy Plasma instance when leaving about me page
             if (plasmaInstance) {
                 plasmaInstance.destroy();
@@ -1728,6 +1793,29 @@
 
 
         // --- Main Execution ---
+        
+        // --- COPYRIGHT PROTECTION: Console Warning ---
+        console.log('%c⚠️ COPYRIGHT WARNING ⚠️', 'color: #ff0000; font-size: 24px; font-weight: bold;');
+        console.log('%c© 2025 Daniel Long - All Rights Reserved', 'color: #ff6600; font-size: 16px; font-weight: bold;');
+        console.log('%cThis website\'s code and design are protected by copyright.', 'color: #ffffff; font-size: 14px;');
+        console.log('%cUnauthorized copying or use is strictly prohibited.', 'color: #ffffff; font-size: 14px;');
+        console.log('%cContact: daniellong1109@gmail.com for licensing inquiries.', 'color: #00ff00; font-size: 12px;');
+        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #666666;');
+        
+        // --- COPYRIGHT PROTECTION: Disable right-click (optional - can be bypassed) ---
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            console.warn('Right-click disabled. © 2025 Daniel Long');
+        });
+        
+        // --- COPYRIGHT PROTECTION: Disable common copy shortcuts ---
+        document.addEventListener('keydown', (e) => {
+            // Disable Ctrl+U (view source), Ctrl+S (save), F12 (devtools)
+            if ((e.ctrlKey && (e.key === 'u' || e.key === 's')) || e.key === 'F12') {
+                e.preventDefault();
+                console.warn('Action disabled. © 2025 Daniel Long');
+            }
+        });
         
         // --- SYNCHRONIZATION POINT ---
         window.addEventListener('load', () => {
