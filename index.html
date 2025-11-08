@@ -48,7 +48,8 @@
     {
       "imports": {
         "three": "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/",
+        "ogl": "/node_modules/ogl/dist/ogl.mjs"
       }
     }
     </script>
@@ -208,7 +209,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: 15; /* Above canvas, below Directory */
+            z-index: 10; /* UPDATED: High enough for glass panels to be on top */
             /* Adjusted padding for glass panel alignment */
             padding: 8rem 2rem 2rem 2rem; /* Increased top padding */
             overflow-y: auto; /* Enable scrolling */
@@ -219,13 +220,8 @@
         }
         .dark .page-content {
              background-color: transparent; /* UPDATED: Was #000000 */
-             color: #f0f0f0;
+             color: #f0f0f0; 
         }
-
-        /* Contact page terminal background */
-        .contact-terminal-bg { position: absolute; inset: 0; z-index: 0; }
-        .contact-bouncing-logo { position: fixed; top: 0; left: 0; width: 100px; height: 100px; z-index: 1; pointer-events: none; background-image: url('https://raw.githubusercontent.com/itzmedaniel/website/main/pochita.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.8; }
-        .page-content .glass-panel { position: relative; z-index: 2; }
 
         .home-button {
             position: fixed;
@@ -445,6 +441,7 @@
              border-radius: 0.75rem; /* rounded-xl */
              margin-bottom: 2rem; 
              position: relative; 
+             z-index: 10; /* Above bouncing logo (8) */
              transform-style: preserve-3d; /* Enable 3D transforms */
              transform-origin: center center; /* Center transform origin */
              /* Light Mode */
@@ -502,6 +499,30 @@
 
         .dark .bouncing-orb {
             background: linear-gradient(135deg, #818cf8 0%, #34d399 100%); /* Lighter purple/green */
+        }
+        
+        /* FaultyTerminal Background Container */
+        .terminal-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2; /* Behind the orb */
+            opacity: 1; /* INCREASED: Full opacity for better visibility in light mode */
+            pointer-events: none; /* Don't block interactions */
+        }
+        
+        .terminal-background canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        /* Debug helper - remove after testing */
+        .terminal-background.debug {
+            border: 2px solid red;
+            opacity: 1;
         }
 
         /* Form styling */
@@ -588,14 +609,15 @@
         }
         
         /* --- START: Bouncing Logo Styles --- */
-        #bouncing-logo {
-            position: fixed;
+        .bouncing-logo-element {
+            position: absolute; /* UPDATED: Changed from fixed to absolute (inside page-content) */
             top: 0;
             left: 0;
             width: 100px; /* Logo size */
             height: 100px; /* Logo size */
-            z-index: 12; /* UPDATED: Back to 12 (behind page content) */
+            z-index: 5; /* UPDATED: Above backgrounds (1), below glass panels (10) */
             pointer-events: none; /* Don't block clicks */
+            will-change: transform; /* Optimize for animation */
             
             /* === UPDATED URL HERE (using raw GitHub link) === */
             background-image: url('https://raw.githubusercontent.com/itzmedaniel/website/main/pochita.png');
@@ -604,22 +626,14 @@
             background-position: center;
             
             /* Start hidden */
-            display: none; 
+            display: none;
+            visibility: visible;
             
             /* NEW: Blend mode and opacity for background effect */
-            opacity: 0.8; /* UPDATED: Was 0.2, now much more visible */
+            opacity: 1; /* UPDATED: Full opacity for visibility */
             /* REMOVED: mix-blend-mode: multiply; */
         }
-
-        .dark #bouncing-logo {
-            /* REMOVED: mix-blend-mode: screen; */
-            /* This rule is no longer needed */
-        }
         
-        /* @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        } */
         /* --- END: Bouncing Logo Styles --- */
 
 
@@ -635,9 +649,6 @@
         </svg>
     </button>
     
-    <!-- NEW: Bouncing Logo element -->
-    <div id="bouncing-logo"></div>
-
     <!-- Main Content Wrapper -->
     <div id="main-content">
         <!-- TOP LEFT TEXT SECTION -->
@@ -752,8 +763,12 @@
     <!-- About Me Page Content (initially hidden) -->
     <div id="about-me-page" class="hidden page-content text-container">
         <!-- Width class max-w-6xl -->
-        <div class="bouncing-orb" id="orb-aboutMe"></div> 
-        <div class="max-w-6xl mx-auto glass-panel"> 
+        <div class="bouncing-orb" id="orb-aboutMe"></div>
+        <!-- Plasma Background -->
+        <div class="terminal-background" id="plasma-bg-aboutme" style="z-index: 1;"></div>
+        <!-- Bouncing Logo (between background and content) -->
+        <div class="bouncing-logo-element"></div>
+        <div class="max-w-6xl mx-auto glass-panel" style="position: relative; z-index: 10;"> 
             <h1 class="mb-6 text-4xl font-bold text-center animated-heading md:text-5xl">About Me</h1>
             <p class="mb-4 text-lg">
                 Hello! I'm Daniel Long, i am currently a college student developing and improving my portfolio. 
@@ -773,8 +788,12 @@
     <!-- Project Page Content (initially hidden) -->
     <div id="project-page" class="hidden page-content text-container">
          <!-- Width class max-w-6xl -->
-         <div class="bouncing-orb" id="orb-project"></div> 
-         <div class="max-w-6xl mx-auto glass-panel"> 
+         <div class="bouncing-orb" id="orb-project"></div>
+         <!-- FaultyTerminal Background - MOVED AFTER ORB -->
+         <div class="terminal-background" id="terminal-bg-project" style="z-index: 1;"></div>
+         <!-- Bouncing Logo (between background and content) -->
+         <div class="bouncing-logo-element"></div>
+         <div class="max-w-6xl mx-auto glass-panel" style="position: relative; z-index: 10;"> 
              <!-- ADDED CLASS: animated-heading -->
             <h1 class="mb-6 text-4xl font-bold text-center animated-heading md:text-5xl">Project</h1>
             <p class="mb-10 text-lg">
@@ -818,14 +837,16 @@
 
     <!-- Contact Page Content (initially hidden) -->
     <div id="contact-page" class="hidden page-content text-container">
-        <div id="contact-terminal-bg" class="contact-terminal-bg"></div>
-        <div id="contact-bouncing-logo" class="contact-bouncing-logo"></div>
         <!-- Width class max-w-6xl -->
-        <div class="bouncing-orb" id="orb-contact"></div> 
-        <div class="max-w-6xl mx-auto glass-panel"> 
+        <div class="bouncing-orb" id="orb-contact"></div>
+        <!-- LiquidChrome Background -->
+        <div class="terminal-background" id="liquid-chrome-bg-contact" style="z-index: 1;"></div>
+        <!-- Bouncing Logo (between background and content) -->
+        <div class="bouncing-logo-element"></div>
+        <div class="max-w-6xl mx-auto glass-panel" style="position: relative; z-index: 10;"> 
             <!-- ADDED CLASS: animated-heading -->
             <h1 class="mb-6 text-4xl font-bold text-center animated-heading md:text-5xl">Contact</h1>
-
+            
             <div class="flex flex-col space-y-6">
                 <!-- Social Icons -->
                 <div class="flex justify-center py-4 space-x-6 border-t border-b border-gray-200 dark:border-gray-600">
@@ -845,7 +866,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M0 4v16h24v-16h-24zm19.646 1.354l-7.646 6.646-7.646-6.646h15.292zm-15.292 14.292v-10.49l7.646 6.646 7.646-6.646v10.49h-15.292z"/></svg>
                     </a>
 
-                     <a href="httpshttps://github.com/itzmedaniel" target="_blank" class="social-icon-link" title="GitHub">
+                     <a href="https://github.com/itzmedaniel" target="_blank" class="social-icon-link" title="GitHub">
                          <!-- Updated GitHub Icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.374-12 12 0 5.302 3.438 9.8 8.207 11.387.6.11.82-.26.82-.577v-2.09c-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.332-1.756-1.332-1.756-1.089-.745.083-.73.083-.73 1.205.085 1.838 1.233 1.838 1.233 1.065 1.837 2.809 1.305 3.495.998.108-.778.417-1.305.762-1.604-2.665-.304-5.466-1.333-5.466-5.93 0-1.31.464-2.383 1.234-3.221-.124-.304-.535-1.527.117-3.176 0 0 1.008-.322 3.301 1.23a11.396 11.396 0 0 1 2.502-.337c.831-.059 1.66-.059 2.502.337 2.292-1.552 3.3-1.23 3.3-1.157 1.353 1.649.242 2.872.118 3.176.77.838 1.234 1.911 1.234 3.221 0 4.59-2.805 5.62-5.478 5.92-.413.359-.817 1.082-.817 2.182v3.235c0 .318.219.687.823.575C20.56 21.802 24 17.301 24 12c0-6.626-5.374-12-12-12z"/></svg>
                     </a>
@@ -876,8 +897,12 @@
     <!-- Reference Page Content (initially hidden) -->
     <div id="reference-page" class="hidden page-content text-container">
         <!-- Width class max-w-6xl -->
-        <div class="bouncing-orb" id="orb-reference"></div> 
-         <div class="max-w-6xl mx-auto glass-panel"> 
+        <div class="bouncing-orb" id="orb-reference"></div>
+        <!-- LetterGlitch Background -->
+        <div class="terminal-background" id="letter-glitch-bg-reference" style="z-index: 1;"></div>
+        <!-- Bouncing Logo (between background and content) -->
+        <div class="bouncing-logo-element"></div>
+         <div class="max-w-6xl mx-auto glass-panel" style="position: relative; z-index: 10;"> 
             <h1 class="mb-6 text-4xl font-bold text-center animated-heading md:text-5xl">Reference</h1>
             <p class="mb-10 text-lg">
                 The content and assets used in this project are referenced below to ensure proper attribution and prevent plagiarism.
@@ -896,6 +921,11 @@
 
             <h2 class="mb-4 text-2xl font-bold">Design & Technology References</h2>
             <ul class="mb-8 ml-4 space-y-2 list-disc list-inside">
+                <li>
+                    **Background Effects:** The animated background effects (Plasma, FaultyTerminal, LiquidChrome, and LetterGlitch) used on various pages were sourced from Reactbits.dev.
+                    <br><a href="https://reactbits.dev" target="_blank" class="text-blue-400 hover:underline">https://reactbits.dev</a>
+                    <br><small class="opacity-70">Note: Original React components were converted to vanilla JavaScript for this project.</small>
+                </li>
                 <li>
                     **AI Development Assistance:** This website's animations, UI structure, and complex logic were written with the assistance of a large language model (LLM), which acted as a development partner.
                     <br><small class="opacity-70">Acknowledged: Google Gemini</small>
@@ -919,7 +949,7 @@
                  <!-- NEW: Added PNG Reference -->
                 <li>
                     **Pochita PNG:** Sourced from pnganime.com for the bouncing logo effect.
-                    <br><a href="httpshttps://pnganime.com/gallery/puchita-png" target="_blank" class="text-blue-400 hover:underline">https://pnganime.com/gallery/puchita-png</a>
+                    <br><a href="https://pnganime.com/gallery/puchita-png" target="_blank" class="text-blue-400 hover:underline">https://pnganime.com/gallery/puchita-png</a>
                 </li>
                 <li>
                     **Sketchfab Models (Reference for styling/display, actual files uploaded):**
@@ -939,9 +969,6 @@
 
         <!-- Main 3D Logic -->
     <script type="module">
-        import React from 'react';
-        import { createRoot } from 'react-dom/client';
-        import LiquidChrome from './LiquidChrome.jsx';
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -955,28 +982,6 @@
         let isBlackHoleLoaded = false;
 
         let animationFrameId = null;
-
-        // React mount for LiquidChrome on Contact page
-        let contactReactRoot = null;
-        function mountLiquidChrome() {
-            const slot = document.getElementById('contact-terminal-bg');
-            if (!slot) return;
-            if (!contactReactRoot) {
-                contactReactRoot = createRoot(slot);
-            }
-            contactReactRoot.render(React.createElement(LiquidChrome, {
-                baseColor: [0.1, 0.1, 0.1],
-                speed: 0.2,
-                amplitude: 0.6,
-                interactive: false
-            }));
-        }
-        function unmountLiquidChrome() {
-            if (contactReactRoot) {
-                contactReactRoot.unmount();
-                contactReactRoot = null;
-            }
-        }
 
         // Theme colors for 3D scene
         const themes = {
@@ -1185,9 +1190,6 @@
                 if (newX < 0) newX = 0;
                 if (newY < 0) newY = 0;
                 if (newX > maxW) newX = maxW;
-                
-                // --- THIS IS THE FIX ---
-                // The typo was here. It incorrectly used maxW instead of maxH.
                 if (newY > maxH) newY = maxH; 
                 
                 element.style.left = `${newX}px`;
@@ -1423,11 +1425,36 @@
                      delete headingAnimationInstances[pageId];
                  }
             });
+            
+            // Destroy FaultyTerminal instance when leaving project page
+            if (terminalInstance) {
+                terminalInstance.destroy();
+                terminalInstance = null;
+            }
+            
+            // Destroy LetterGlitch instance when leaving reference page
+            if (letterGlitchInstance) {
+                letterGlitchInstance.destroy();
+                letterGlitchInstance = null;
+            }
+            
+            // Destroy Plasma instance when leaving about me page
+            if (plasmaInstance) {
+                plasmaInstance.destroy();
+                plasmaInstance = null;
+            }
+            
+            // Destroy LiquidChrome instance when leaving contact page
+            if (liquidChromeInstance) {
+                liquidChromeInstance.destroy();
+                liquidChromeInstance = null;
+            }
 
             // --- Trigger UI animation on returning home ---
-             unmountLiquidChrome();
-             selectLogoForPage('home');
              animateUIIn();
+             
+             // Start bouncing logo on home page
+             startBouncingLogo();
              
              // RESTART THE 3D RENDER LOOP
              if (!animationFrameId) {
@@ -1462,6 +1489,26 @@
                  animationFrameId = null;
              }
              
+             // --- NEW: Initialize FaultyTerminal for Project page ---
+             if (pageId === 'project' && !terminalInstance) {
+                 initFaultyTerminal();
+             }
+             
+             // --- NEW: Initialize LetterGlitch for Reference page ---
+             if (pageId === 'reference' && !letterGlitchInstance) {
+                 initLetterGlitch();
+             }
+             
+             // --- NEW: Initialize Plasma for About Me page ---
+             if (pageId === 'aboutMe' && !plasmaInstance) {
+                 initPlasma();
+             }
+             
+             // --- NEW: Initialize LiquidChrome for Contact page ---
+             if (pageId === 'contact' && !liquidChromeInstance) {
+                 initLiquidChrome();
+             }
+             
              // --- NEW: Page entrance animation ---
              const glassPanel = currentPageElement.querySelector('.glass-panel');
              if (glassPanel) {
@@ -1483,8 +1530,6 @@
              animateHeadingCharSlide(pageId);
              
              // --- UPDATED: Start bouncing logo for ALL pages ---
-             if (pageId === 'contact') { mountLiquidChrome(); } else { unmountLiquidChrome(); }
-             selectLogoForPage(pageId);
              startBouncingLogo();
         }
 
@@ -1595,18 +1640,7 @@
         
         
         // --- START: Bouncing Logo Logic ---
-        let logo = null;
-        function selectLogoForPage(pageId) {
-            if (pageId === 'contact') {
-                logo = document.getElementById('contact-bouncing-logo');
-                const globalLogo = document.getElementById('bouncing-logo');
-                if (globalLogo) globalLogo.style.display = 'none';
-            } else {
-                logo = document.getElementById('bouncing-logo');
-                const contactLogo = document.getElementById('contact-bouncing-logo');
-                if (contactLogo) contactLogo.style.display = 'none';
-            }
-        }
+        let logo = null; // Will be set to the active page's logo
         let x = 100; // Initial X
         let y = 100; // Initial Y
         // UPDATED: Changed speed to 1.5
@@ -1617,7 +1651,7 @@
 
         function animateLogo() {
             if (!logo) return; // Guard against missing element
-            const bounds = { width: window.innerWidth, height: window.innerHeight };
+            const bounds = document.body.getBoundingClientRect();
             const logoWidth = logo.offsetWidth; // Use offsetWidth for layout size
             const logoHeight = logo.offsetHeight;
             
@@ -1626,19 +1660,19 @@
             rotation += 2; // NEW: Increment rotation for spinning effect
 
             // Bounce logic
-            if (x + logoWidth >= bounds.width) {
+            if (x + logoWidth > bounds.width) {
                 x = bounds.width - logoWidth;
                 vx *= -1;
             }
-            if (x <= 0) {
+            if (x < 0) {
                 x = 0;
                 vx *= -1;
             }
-            if (y + logoHeight >= bounds.height) {
+            if (y + logoHeight > bounds.height) {
                 y = bounds.height - logoHeight;
                 vy *= -1;
             }
-            if (y <= 0) {
+            if (y < 0) {
                 y = 0;
                 vy *= -1;
             }
@@ -1651,13 +1685,23 @@
         }
         
         function startBouncingLogo() {
+             // Get the logo from the currently active page
+             if (activePageElement) {
+                 logo = activePageElement.querySelector('.bouncing-logo-element');
+             }
+             console.log('startBouncingLogo called, logo element:', logo);
              if (logo) {
                 logo.style.display = 'block';
+                logo.style.visibility = 'visible';
+                console.log('Logo display set to block, visibility:', logo.style.visibility);
              }
-             if (!logoAnimationId) {
-                 // Reset position
-                 x = Math.random() * (window.innerWidth - 100);
-                 y = Math.random() * (window.innerHeight - 100);
+             if (!logoAnimationId && logo) {
+                 // Reset position - clamp to visible area
+                 const maxX = window.innerWidth - 100;
+                 const maxY = window.innerHeight - 100;
+                 // Keep logo in center 60% of screen to avoid edges
+                 x = Math.random() * (maxX * 0.6) + (maxX * 0.2);
+                 y = Math.random() * (maxY * 0.6) + (maxY * 0.2);
                  // Reset speed
                  vx = (Math.random() > 0.5 ? 1 : -1) * 1.5; // UPDATED: Speed 1.5
                  vy = (Math.random() > 0.5 ? 1 : -1) * 1.5; // UPDATED: Speed 1.5
@@ -1667,6 +1711,7 @@
                     // UPDATED: Add rotate() to the initial transform
                     rotation = 0; // Reset rotation
                     logo.style.transform = `translate(${x}px, ${y}px) rotate(0deg)`;
+                    console.log('Logo initial position:', x, y, 'Window size:', window.innerWidth, 'x', window.innerHeight);
                  }
                  animateLogo();
              }
@@ -1688,6 +1733,18 @@
         window.addEventListener('load', () => {
              init();
              animate(); // Start 3D animation loop
+             
+             // Load FaultyTerminal script
+             loadFaultyTerminalScript();
+             
+             // Load LetterGlitch script
+             loadLetterGlitchScript();
+             
+             // Load Plasma script
+             loadPlasmaScript();
+             
+             // Load LiquidChrome script
+             loadLiquidChromeScript();
              
              // Time and Weather setup moved here
              updateTime(); 
@@ -1995,8 +2052,235 @@
         
         // --- REMOVED: GEMINI API FUNCTIONS ---
 
+        // --- FaultyTerminal Background Logic ---
+        let terminalInstance = null;
+        let letterGlitchInstance = null;
+        let plasmaInstance = null;
+        let liquidChromeInstance = null;
+        
+        function initFaultyTerminal() {
+            console.log('initFaultyTerminal called');
+            const terminalContainer = document.getElementById('terminal-bg-project');
+            if (!terminalContainer) {
+                console.error('Terminal container not found!');
+                return;
+            }
+            
+            console.log('Terminal container found:', terminalContainer);
+            
+            // Clean up existing instance
+            if (terminalInstance) {
+                console.log('Destroying existing terminal instance');
+                terminalInstance.destroy();
+                terminalInstance = null;
+            }
+            
+            // Check if FaultyTerminal class exists
+            if (typeof FaultyTerminal === 'undefined') {
+                console.error('FaultyTerminal class not found! Retrying...');
+                setTimeout(initFaultyTerminal, 100);
+                return;
+            }
+            
+            console.log('Creating FaultyTerminal instance...');
+            
+            try {
+                // Create new terminal instance
+                terminalInstance = new FaultyTerminal(terminalContainer, {
+                    tint: '#4a6741', // Grayish-green forest color
+                    mouseReact: true,
+                    timeScale: 1,
+                    brightness: 1
+                });
+                console.log('FaultyTerminal instance created successfully!', terminalInstance);
+            } catch (error) {
+                console.error('Error creating FaultyTerminal:', error);
+            }
+        }
+        
+        // Load the FaultyTerminal script
+        function loadFaultyTerminalScript() {
+            console.log('Loading FaultyTerminal script...');
+            const script = document.createElement('script');
+            script.src = 'FaultyTerminal.js';
+            script.onload = () => {
+                console.log('FaultyTerminal script loaded successfully');
+            };
+            script.onerror = () => {
+                console.error('Failed to load FaultyTerminal.js');
+            };
+            document.head.appendChild(script);
+        }
+        
+        // --- LetterGlitch Background Logic ---
+        function initLetterGlitch() {
+            console.log('initLetterGlitch called');
+            const letterGlitchContainer = document.getElementById('letter-glitch-bg-reference');
+            if (!letterGlitchContainer) {
+                console.error('LetterGlitch container not found!');
+                return;
+            }
+            
+            console.log('LetterGlitch container found:', letterGlitchContainer);
+            
+            // Clean up existing instance
+            if (letterGlitchInstance) {
+                console.log('Destroying existing LetterGlitch instance');
+                letterGlitchInstance.destroy();
+                letterGlitchInstance = null;
+            }
+            
+            // Check if LetterGlitch class exists
+            if (typeof LetterGlitch === 'undefined') {
+                console.error('LetterGlitch class not found! Retrying...');
+                setTimeout(initLetterGlitch, 100);
+                return;
+            }
+            
+            console.log('Creating LetterGlitch instance...');
+            
+            try {
+                // Create new LetterGlitch instance
+                letterGlitchInstance = new LetterGlitch(letterGlitchContainer, {
+                    glitchSpeed: 50,
+                    centerVignette: true,
+                    outerVignette: false,
+                    smooth: true
+                });
+                console.log('LetterGlitch instance created successfully!', letterGlitchInstance);
+            } catch (error) {
+                console.error('Error creating LetterGlitch:', error);
+            }
+        }
+        
+        // Load the LetterGlitch script
+        function loadLetterGlitchScript() {
+            console.log('Loading LetterGlitch script...');
+            const script = document.createElement('script');
+            script.src = 'LetterGlitch.js';
+            script.onload = () => {
+                console.log('LetterGlitch script loaded successfully');
+            };
+            script.onerror = () => {
+                console.error('Failed to load LetterGlitch.js');
+            };
+            document.head.appendChild(script);
+        }
+        
+        // --- Plasma Background Logic ---
+        function initPlasma() {
+            console.log('initPlasma called');
+            const plasmaContainer = document.getElementById('plasma-bg-aboutme');
+            if (!plasmaContainer) {
+                console.error('Plasma container not found!');
+                return;
+            }
+            
+            console.log('Plasma container found:', plasmaContainer);
+            
+            // Clean up existing instance
+            if (plasmaInstance) {
+                console.log('Destroying existing Plasma instance');
+                plasmaInstance.destroy();
+                plasmaInstance = null;
+            }
+            
+            // Check if Plasma class exists
+            if (typeof Plasma === 'undefined') {
+                console.error('Plasma class not found! Retrying...');
+                setTimeout(initPlasma, 100);
+                return;
+            }
+            
+            console.log('Creating Plasma instance...');
+            
+            try {
+                // Create new Plasma instance
+                plasmaInstance = new Plasma(plasmaContainer, {
+                    color: '#b19cd9',
+                    speed: 0.6,
+                    direction: 'forward',
+                    scale: 1.1,
+                    opacity: 0.8,
+                    mouseInteractive: true
+                });
+                console.log('Plasma instance created successfully!', plasmaInstance);
+            } catch (error) {
+                console.error('Error creating Plasma:', error);
+            }
+        }
+        
+        // Load the Plasma script
+        function loadPlasmaScript() {
+            console.log('Loading Plasma script...');
+            const script = document.createElement('script');
+            script.src = 'Plasma.js';
+            script.onload = () => {
+                console.log('Plasma script loaded successfully');
+            };
+            script.onerror = () => {
+                console.error('Failed to load Plasma.js');
+            };
+            document.head.appendChild(script);
+        }
+        
+        // --- LiquidChrome Background Logic ---
+        function initLiquidChrome() {
+            console.log('initLiquidChrome called');
+            const liquidChromeContainer = document.getElementById('liquid-chrome-bg-contact');
+            if (!liquidChromeContainer) {
+                console.error('LiquidChrome container not found!');
+                return;
+            }
+            
+            console.log('LiquidChrome container found:', liquidChromeContainer);
+            
+            // Clean up existing instance
+            if (liquidChromeInstance) {
+                console.log('Destroying existing LiquidChrome instance');
+                liquidChromeInstance.destroy();
+                liquidChromeInstance = null;
+            }
+            
+            // Check if LiquidChrome class exists
+            if (typeof LiquidChrome === 'undefined') {
+                console.error('LiquidChrome class not found! Retrying...');
+                setTimeout(initLiquidChrome, 100);
+                return;
+            }
+            
+            console.log('Creating LiquidChrome instance...');
+            
+            try {
+                // Create new LiquidChrome instance
+                liquidChromeInstance = new LiquidChrome(liquidChromeContainer, {
+                    baseColor: [0.1, 0.1, 0.1],
+                    speed: 0.3,
+                    amplitude: 0.6,
+                    frequencyX: 3,
+                    frequencyY: 3,
+                    interactive: true
+                });
+                console.log('LiquidChrome instance created successfully!', liquidChromeInstance);
+            } catch (error) {
+                console.error('Error creating LiquidChrome:', error);
+            }
+        }
+        
+        // Load the LiquidChrome script
+        function loadLiquidChromeScript() {
+            console.log('Loading LiquidChrome script...');
+            const script = document.createElement('script');
+            script.src = 'LiquidChrome.js';
+            script.onload = () => {
+                console.log('LiquidChrome script loaded successfully');
+            };
+            script.onerror = () => {
+                console.error('Failed to load LiquidChrome.js');
+            };
+            document.head.appendChild(script);
+        }
+
     </script>
 </body>
 </html>
-
-
