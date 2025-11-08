@@ -179,21 +179,35 @@ const LetterGlitch = ({
     animate();
 
     let resizeTimeout;
+    let lastWidth = window.innerWidth;
+    let lastHeight = window.innerHeight;
 
     const handleResize = () => {
+      // Only resize if dimensions actually changed (not just scroll/zoom)
+      const currentWidth = window.innerWidth;
+      const currentHeight = window.innerHeight;
+      
+      if (currentWidth === lastWidth && currentHeight === lastHeight) {
+        return; // Dimensions didn't change, ignore
+      }
+      
+      lastWidth = currentWidth;
+      lastHeight = currentHeight;
+      
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
         cancelAnimationFrame(animationRef.current);
         resizeCanvas();
         animate();
-      }, 100);
+      }, 150); // Increased debounce time
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
 
     return () => {
       cancelAnimationFrame(animationRef.current);
       window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimeout);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [glitchSpeed, smooth]);

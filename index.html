@@ -235,25 +235,25 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: 10; /* UPDATED: High enough for glass panels to be on top */
+            z-index: 50; /* High z-index when visible */
             /* Adjusted padding for glass panel alignment */
             padding: 8rem 2rem 2rem 2rem; /* Increased top padding */
-            overflow-y: auto; /* Enable scrolling */
-             /* Background is now mostly for fallback or non-blur browsers */
-             background-color: transparent; /* UPDATED: Was #f3f4f6 */
-             color: #111827; 
-             transition: background-color 0.3s, color 0.3s;
+            overflow-y: auto; /* Enable scrolling within the page */
+            /* FIXED: Transparent background so we can see the background effects */
+            background-color: transparent;
+            color: #111827; 
+            transition: color 0.3s;
         }
         .dark .page-content {
-             background-color: transparent; /* UPDATED: Was #000000 */
-             color: #f0f0f0; 
+            background-color: transparent;
+            color: #f0f0f0; 
         }
 
         .home-button {
             position: fixed;
             top: 1.5rem; 
             left: 1.5rem; 
-            z-index: 30; 
+            z-index: 100; /* FIXED: Higher than page-content (50) */
             width: 40px;
             height: 40px;
             border-radius: 50%;
@@ -486,15 +486,15 @@
         }
          /* Dark Mode */
         .dark .glass-panel {
-            background: rgba(17, 24, 39, 0.75); 
+            background: rgba(25, 25, 25, 0.8); 
             backdrop-filter: blur(12px) saturate(180%);
              -webkit-backdrop-filter: blur(12px) saturate(180%);
             
-            /* Glow and Border (translucent light blue/white outline) */
+            /* Glow and Border (translucent gray outline) */
             box-shadow: 
-                0 0 20px 5px rgba(96, 165, 250, 0.5), /* Outer glow */
-                inset 0 0 0 1px rgba(96, 165, 250, 0.4); /* Inner light outline */
-            border: 1px solid rgba(96, 165, 250, 0.3); 
+                0 0 20px 5px rgba(100, 100, 100, 0.3), /* Outer glow */
+                inset 0 0 0 1px rgba(120, 120, 120, 0.3); /* Inner light outline */
+            border: 1px solid rgba(120, 120, 120, 0.3); 
         }
         
         /* Footer style */
@@ -534,23 +534,360 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -2; /* Behind the orb */
-            opacity: 1; /* INCREASED: Full opacity for better visibility in light mode */
+            overflow: hidden;
+            z-index: 1; /* Behind page content but visible */
+            opacity: 0; /* Hidden by default with opacity, not display */
             pointer-events: none; /* Don't block interactions */
-            will-change: opacity; /* OPTIMIZED: GPU acceleration hint */
+            will-change: opacity; /* GPU acceleration hint */
+            visibility: hidden; /* Also hide from layout */
+            transition: opacity 0.3s ease; /* Smooth fade in/out */
         }
         
         .terminal-background canvas {
-            width: 100%;
-            height: 100%;
+            width: 100% !important;
+            height: 100% !important;
             display: block;
-            will-change: transform; /* OPTIMIZED: GPU acceleration for canvas */
+            object-fit: cover;
+            will-change: auto; /* Remove will-change to prevent constant recomposition */
         }
         
         /* Debug helper - remove after testing */
         .terminal-background.debug {
             border: 2px solid red;
             opacity: 1;
+        }
+
+        /* CardNav Styles - Vertical Right Side */
+        .card-nav-container {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            height: auto;
+            max-height: 85vh;
+            z-index: 100;
+            box-sizing: border-box;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        /* Hide CardNav on homepage */
+        body.on-home .card-nav-container {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .card-nav {
+            display: flex;
+            flex-direction: row;
+            width: 45px;
+            height: 45px;
+            padding: 0;
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+            transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        height 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        background-color 0.3s ease,
+                        border-color 0.3s ease;
+        }
+
+        /* Dark mode styles for CardNav */
+        .dark .card-nav {
+            background-color: rgba(50, 50, 50, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-nav.open {
+            width: 220px;
+            height: auto;
+        }
+
+        .card-nav-top {
+            position: relative;
+            width: 45px;
+            min-width: 45px;
+            min-height: 45px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 0.25rem;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .hamburger-menu {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            gap: 4px;
+            padding: 0.25rem 0;
+            position: relative;
+            z-index: 100;
+        }
+
+        .hamburger-menu:hover .hamburger-line {
+            opacity: 0.75;
+        }
+
+        .hamburger-line {
+            width: 20px;
+            height: 2px;
+            background-color: #1f2937;
+            transition: transform 0.25s ease, opacity 0.2s ease, background-color 0.3s ease;
+            transform-origin: 50% 50%;
+        }
+
+        .dark .hamburger-line {
+            background-color: #f3f4f6;
+        }
+
+        .hamburger-menu.open .hamburger-line:first-child {
+            transform: translateY(3px) rotate(45deg);
+        }
+
+        .hamburger-menu.open .hamburger-line:last-child {
+            transform: translateY(-3px) rotate(-45deg);
+        }
+
+        .card-nav-content {
+            position: relative;
+            width: 0;
+            opacity: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            visibility: hidden;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+            transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                        opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        padding 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .card-nav.open .card-nav-content {
+            width: auto;
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            padding: 0.5rem;
+            padding-left: 0.25rem;
+            padding-right: 0.75rem;
+        }
+
+        .nav-card-link-wrapper {
+            text-decoration: none;
+            display: block;
+            width: 100%;
+        }
+
+        .nav-card {
+            width: 100%;
+            min-height: 36px;
+            border-radius: 18px;
+            position: relative;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 8px 14px;
+            gap: 8px;
+            user-select: none;
+            transform: translateX(30px);
+            opacity: 0;
+            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        box-shadow 0.3s ease;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .nav-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .nav-card::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: currentColor;
+            opacity: 0.7;
+            flex-shrink: 0;
+        }
+
+        .nav-card-metallic {
+            display: none;
+            height: 18px;
+            width: auto;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        .nav-card-bg-preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 1;
+        }
+
+        .card-nav.open .nav-card-link-wrapper:nth-child(1) .nav-card {
+            transition-delay: 0.15s;
+        }
+
+        .card-nav.open .nav-card-link-wrapper:nth-child(2) .nav-card {
+            transition-delay: 0.2s;
+        }
+
+        .card-nav.open .nav-card-link-wrapper:nth-child(3) .nav-card {
+            transition-delay: 0.25s;
+        }
+
+        .card-nav.open .nav-card-link-wrapper:nth-child(4) .nav-card {
+            transition-delay: 0.3s;
+        }
+
+        .card-nav.open .nav-card {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        /* Reset transition delays when closing */
+        .card-nav:not(.open) .nav-card {
+            transition-delay: 0s;
+        }
+
+        .dark .nav-card {
+            color: #ffffff;
+        }
+
+        .nav-card-label {
+            font-weight: 600;
+            font-size: 13px;
+            letter-spacing: -0.2px;
+            position: relative;
+            z-index: 10;
+            pointer-events: none;
+            background: linear-gradient(
+                90deg,
+                #3a3a3a 0%,
+                #6b6b6b 15%,
+                #a8a8a8 30%,
+                #e0e0e0 45%,
+                #ffffff 50%,
+                #e0e0e0 55%,
+                #a8a8a8 70%,
+                #6b6b6b 85%,
+                #3a3a3a 100%
+            );
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: metallicShine 5s linear infinite;
+            filter: brightness(1.5) contrast(1.3) drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+        }
+
+        @keyframes metallicShine {
+            0% {
+                background-position: 200% 0%;
+            }
+            100% {
+                background-position: -200% 0%;
+            }
+        }
+
+        .nav-card::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: linear-gradient(
+                90deg,
+                #3a3a3a 0%,
+                #6b6b6b 15%,
+                #a8a8a8 30%,
+                #e0e0e0 45%,
+                #ffffff 50%,
+                #e0e0e0 55%,
+                #a8a8a8 70%,
+                #6b6b6b 85%,
+                #3a3a3a 100%
+            );
+            background-size: 200% 100%;
+            flex-shrink: 0;
+            animation: metallicShine 5s linear infinite;
+            filter: brightness(1.5) contrast(1.3) drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+        }
+
+        .nav-card-link {
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: inherit;
+        }
+
+        .nav-card-link:hover {
+            opacity: 0.75;
+            transform: translateX(2px);
+        }
+
+        .nav-card-link-icon {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            .card-nav-container {
+                right: 1rem;
+            }
+
+            .card-nav.open {
+                width: 200px;
+            }
+
+            .card-nav.open .card-nav-content {
+                width: 155px;
+            }
+
+            .nav-card {
+                min-height: 32px;
+                padding: 6px 12px;
+            }
+
+            .nav-card-label {
+                font-size: 12px;
+            }
+
+            .nav-card-label {
+                font-size: 16px;
+            }
+
+            .nav-card-link {
+                font-size: 13px;
+            }
         }
 
         /* Form styling */
@@ -694,7 +1031,18 @@
     </style>
 </head>
 <!-- Removed padding from body -->
-<body class="min-h-screen overflow-hidden">
+<body class="min-h-screen overflow-hidden on-home">
+
+    <!-- FIXED: Background containers outside of page divs so they don't move with page animations -->
+    <div id="backgrounds-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;">
+        <div class="terminal-background" id="plasma-bg-aboutme" style="z-index: 1;"></div>
+        <div class="terminal-background" id="terminal-bg-project" style="z-index: 1;"></div>
+        <div class="terminal-background" id="liquid-chrome-bg-contact" style="z-index: 1;"></div>
+        <div class="terminal-background" id="letter-glitch-bg-reference" style="z-index: 1;"></div>
+    </div>
+
+    <!-- CardNav Container -->
+    <div class="card-nav-container" id="card-nav"></div>
 
     <!-- Signature Watermark -->
     <div class="signature-watermark">© 2025 Daniel Long</div>
@@ -811,18 +1159,12 @@
                 </div>
             </div>
         </div>
-        <!-- NEW: Copyright Footer for Main Page -->
-        <div class="absolute inset-x-0 bottom-0 z-20 copyright-footer text-container">
-            &copy; 2025 Daniel's Project. All rights reserved.
-        </div>
     </div> <!-- End of main-content -->
 
     <!-- About Me Page Content (initially hidden) -->
     <div id="about-me-page" class="hidden page-content text-container">
         <!-- Width class max-w-6xl -->
         <div class="bouncing-orb" id="orb-aboutMe"></div>
-        <!-- Plasma Background -->
-        <div class="terminal-background" id="plasma-bg-aboutme" style="z-index: 1;"></div>
         <!-- Bouncing Logo (between background and content) -->
         <div class="bouncing-logo-element"></div>
         <div class="max-w-6xl mx-auto glass-panel" style="position: relative; z-index: 10;"> 
@@ -835,10 +1177,6 @@
              <p class="mt-10 text-lg"></p>
              <p class="mt-10 text-lg" style="min-height: 50vh;"></p> 
              <p class="mt-10 text-lg"></p>
-             <!-- NEW: Copyright Footer -->
-             <div class="copyright-footer">
-                &copy; 2025 Daniel's Project. All rights reserved.
-             </div>
         </div>
     </div>
 
@@ -846,8 +1184,6 @@
     <div id="project-page" class="hidden page-content text-container">
          <!-- Width class max-w-6xl -->
          <div class="bouncing-orb" id="orb-project"></div>
-         <!-- FaultyTerminal Background - MOVED AFTER ORB -->
-         <div class="terminal-background" id="terminal-bg-project" style="z-index: 1;"></div>
          <!-- Bouncing Logo (between background and content) -->
          <div class="bouncing-logo-element"></div>
          <div class="max-w-6xl mx-auto glass-panel" style="position: relative; z-index: 10;"> 
@@ -885,10 +1221,6 @@
              <!-- NOTE: The 'More project content...' ensures the main page scrollbar appears for the entire page content, as requested. -->
              <p class="mt-10 text-lg" style="min-height: 50vh;">Additional project content here to ensure the main page scrolls...</p> 
              <p class="mt-10 text-lg">End of Project page.</p>
-             <!-- NEW: Copyright Footer -->
-             <div class="copyright-footer">
-                &copy; 2025 Daniel's Project. All rights reserved.
-             </div>
         </div>
     </div>
 
@@ -896,8 +1228,6 @@
     <div id="contact-page" class="hidden page-content text-container">
         <!-- Width class max-w-6xl -->
         <div class="bouncing-orb" id="orb-contact"></div>
-        <!-- LiquidChrome Background -->
-        <div class="terminal-background" id="liquid-chrome-bg-contact" style="z-index: 1;"></div>
         <!-- Bouncing Logo (between background and content) -->
         <div class="bouncing-logo-element"></div>
         <div class="max-w-6xl mx-auto glass-panel" style="position: relative; z-index: 10;"> 
@@ -943,11 +1273,6 @@
                     </button>
                 </form>
             </div>
-            
-            <!-- NEW: Copyright Footer -->
-             <div class="copyright-footer">
-                &copy; 2025 Daniel's Project. All rights reserved.
-             </div>
         </div>
     </div>
 
@@ -955,8 +1280,6 @@
     <div id="reference-page" class="hidden page-content text-container">
         <!-- Width class max-w-6xl -->
         <div class="bouncing-orb" id="orb-reference"></div>
-        <!-- LetterGlitch Background -->
-        <div class="terminal-background" id="letter-glitch-bg-reference" style="z-index: 1;"></div>
         <!-- Bouncing Logo (between background and content) -->
         <div class="bouncing-logo-element"></div>
          <div class="max-w-6xl mx-auto glass-panel" style="position: relative; z-index: 10;"> 
@@ -1016,10 +1339,6 @@
                     </ul>
                 </li>
             </ul>
-            <!-- NEW: Copyright Footer -->
-             <div class="copyright-footer">
-                &copy; 2025 Daniel's Project. All rights reserved.
-             </div>
         </div>
     </div>
 
@@ -1115,6 +1434,9 @@
 
             // Update 3D scene
             updateSceneTheme(effectiveTheme);
+
+            // Update ClickSpark color based on theme
+            updateClickSparkColor();
 
             // Update button styles
             for (const key in themeButtons) {
@@ -1463,79 +1785,66 @@
 // daniel
 // long
         let activePageElement = null; // Track the currently visible page
+        let currentPageIndex = -1; // -1 = home, 0 = aboutMe, 1 = project, 2 = contact, 3 = reference
+        const pageOrder = ['aboutMe', 'project', 'contact', 'reference'];
+        let isAnimating = false; // Prevent multiple scroll triggers during animation
+        let scrollTimeout = null;
 
         function showHomePage() {
-            if (mainContent) mainContent.classList.remove('hidden');
-            if (homeButton) homeButton.classList.add('hidden');
-            // Hide all pages
-            Object.values(pages).forEach(page => {
-                if (page) page.classList.add('hidden');
-            });
-            activePageElement = null; // No page is active
-            
-            // Pause all continuous animations
-            Object.values(panelAnimationInstances).forEach(instance => {
-                 if (instance) instance.pause();
-            });
-            
-            // Clear all directory heading splits and animations
-            Object.keys(pages).forEach(pageId => {
-                 if (!pages[pageId]) return;
-                 const heading = pages[pageId].querySelector('h1.animated-heading');
-                 
-                 // Remove animation instance and its targets
-                 if (headingAnimationInstances[pageId]) {
-                     anime.remove(headingAnimationInstances[pageId].targets);
-                     delete headingAnimationInstances[pageId];
-                 }
-            });
-            
-            // Destroy FaultyTerminal instance when leaving project page
-            if (terminalInstance) {
-                terminalInstance.destroy();
-                terminalInstance = null;
-            }
-            
-            // Destroy LetterGlitch instance when leaving reference page
-            if (letterGlitchInstance) {
-                letterGlitchInstance.destroy();
-                letterGlitchInstance = null;
-            }
-// si
-// xian            
-            // Destroy Plasma instance when leaving about me page
-            if (plasmaInstance) {
-                plasmaInstance.destroy();
-                plasmaInstance = null;
-            }
-            
-            // Destroy LiquidChrome instance when leaving contact page
-            if (liquidChromeInstance) {
-                liquidChromeInstance.destroy();
-                liquidChromeInstance = null;
-            }
+            // Use transition if coming from a page
+            if (activePageElement) {
+                transitionToHome();
+            } else {
+                // Direct show if already on home
+                if (mainContent) mainContent.classList.remove('hidden');
+                if (homeButton) homeButton.classList.add('hidden');
+                Object.values(pages).forEach(page => {
+                    if (page) page.classList.add('hidden');
+                });
+                activePageElement = null;
+                currentPageIndex = -1;
+                
+                // Add on-home class to body
+                document.body.classList.add('on-home');
+                
+                // Clean up
+                Object.values(panelAnimationInstances).forEach(instance => {
+                    if (instance) instance.pause();
+                });
+                Object.keys(pages).forEach(pageId => {
+                    if (!pages[pageId]) return;
+                    if (headingAnimationInstances[pageId]) {
+                        anime.remove(headingAnimationInstances[pageId].targets);
+                        delete headingAnimationInstances[pageId];
+                    }
+                });
+                
+                // Hide all backgrounds (don't destroy them)
+                hideAllBackgrounds();
 
-            // --- Trigger UI animation on returning home ---
-             animateUIIn();
-             
-             // Start bouncing logo on home page
-             startBouncingLogo();
-             
-             // RESTART THE 3D RENDER LOOP
-             if (!animationFrameId) {
-                animate();
-             }
-             
-             // --- NEW: Stop bouncing logo ---
-             // Only stop if it's not the about me page (which is what activePageElement tracks)
-             // On second thought, just always stop it when returning home.
-             stopBouncingLogo();
+                animateUIIn();
+                stopBouncingLogo();
+                
+                // Restart 3D animation
+                if (!animationFrameId) {
+                    animate();
+                }
+            }
         }
         
+        // Make showHomePage globally accessible
+        window.showHomePage = showHomePage;
 
         function showPage(pageId) {
              if (mainContent) mainContent.classList.add('hidden');
              if (homeButton) homeButton.classList.remove('hidden');
+             
+             // Remove on-home class from body
+             document.body.classList.remove('on-home');
+             
+             // Find the index of the page
+             currentPageIndex = pageOrder.indexOf(pageId);
+             
              // Hide all pages first
              Object.values(pages).forEach(page => {
                  if (page) page.classList.add('hidden');
@@ -1554,25 +1863,8 @@
                  animationFrameId = null;
              }
              
-             // --- NEW: Initialize FaultyTerminal for Project page ---
-             if (pageId === 'project' && !terminalInstance) {
-                 initFaultyTerminal();
-             }
-             
-             // --- NEW: Initialize LetterGlitch for Reference page ---
-             if (pageId === 'reference' && !letterGlitchInstance) {
-                 initLetterGlitch();
-             }
-             
-             // --- NEW: Initialize Plasma for About Me page ---
-             if (pageId === 'aboutMe' && !plasmaInstance) {
-                 initPlasma();
-             }
-             
-             // --- NEW: Initialize LiquidChrome for Contact page ---
-             if (pageId === 'contact' && !liquidChromeInstance) {
-                 initLiquidChrome();
-             }
+             // Initialize background for current page
+             initPageBackground(pageId);
              
              // --- NEW: Page entrance animation ---
              const glassPanel = currentPageElement.querySelector('.glass-panel');
@@ -1596,6 +1888,464 @@
              
              // --- UPDATED: Start bouncing logo for ALL pages ---
              startBouncingLogo();
+             
+             // --- NEW: Add wheel event listener for page scrolling ---
+             addPageScrollListener(currentPageElement);
+        }
+        
+        // Make showPage globally accessible
+        window.showPage = showPage;
+        
+        // NEW: Function to initialize background for a specific page
+        function initPageBackground(pageId) {
+            console.log('Initializing background for:', pageId);
+            
+            // First, hide all backgrounds
+            hideAllBackgrounds();
+            
+            // Lazy initialization - only init the background that's needed
+            const initMap = {
+                'aboutMe': () => { 
+                    console.log('Checking plasmaInstance:', plasmaInstance);
+                    if (!plasmaInstance) {
+                        console.log('Initializing Plasma...');
+                        // Wait for script to load
+                        if (typeof Plasma === 'undefined') {
+                            console.warn('Plasma class not loaded yet, retrying...');
+                            setTimeout(() => initPageBackground(pageId), 100);
+                            return;
+                        }
+                        // Make container visible and wait for layout
+                        const container = document.getElementById('plasma-bg-aboutme');
+                        if (container) {
+                            container.style.visibility = 'visible';
+                            container.style.opacity = '1';
+                            container.style.zIndex = '1';
+                            requestAnimationFrame(() => {
+                                initPlasma();
+                            });
+                        } else {
+                            initPlasma();
+                        }
+                    } else {
+                        // Already initialized, just show it
+                        showBackgroundForPage(pageId);
+                    }
+                },
+                'project': () => { 
+                    console.log('Checking terminalInstance:', terminalInstance);
+                    if (!terminalInstance) {
+                        console.log('Initializing FaultyTerminal...');
+                        // Wait for script to load
+                        if (typeof FaultyTerminal === 'undefined') {
+                            console.warn('FaultyTerminal class not loaded yet, retrying...');
+                            setTimeout(() => initPageBackground(pageId), 100);
+                            return;
+                        }
+                        // Make container visible and wait for layout
+                        const container = document.getElementById('terminal-bg-project');
+                        if (container) {
+                            container.style.visibility = 'visible';
+                            container.style.opacity = '1';
+                            container.style.zIndex = '1';
+                            requestAnimationFrame(() => {
+                                initFaultyTerminal();
+                            });
+                        } else {
+                            initFaultyTerminal();
+                        }
+                    } else {
+                        // Already initialized, just show it
+                        showBackgroundForPage(pageId);
+                    }
+                },
+                'contact': () => { 
+                    console.log('Checking liquidChromeInstance:', liquidChromeInstance);
+                    if (!liquidChromeInstance) {
+                        console.log('Initializing LiquidChrome...');
+                        // Wait for script to load
+                        if (typeof LiquidChrome === 'undefined') {
+                            console.warn('LiquidChrome class not loaded yet, retrying...');
+                            setTimeout(() => initPageBackground(pageId), 100);
+                            return;
+                        }
+                        // Make container visible and wait for layout
+                        const container = document.getElementById('liquid-chrome-bg-contact');
+                        if (container) {
+                            container.style.visibility = 'visible';
+                            container.style.opacity = '1';
+                            container.style.zIndex = '1';
+                            requestAnimationFrame(() => {
+                                initLiquidChrome();
+                            });
+                        } else {
+                            initLiquidChrome();
+                        }
+                    } else {
+                        // Already initialized, just show it
+                        showBackgroundForPage(pageId);
+                    }
+                },
+                'reference': () => { 
+                    console.log('Checking letterGlitchInstance:', letterGlitchInstance);
+                    
+                    // FIXED: Always destroy and recreate to ensure proper sizing
+                    if (letterGlitchInstance) {
+                        console.log('Destroying existing LetterGlitch instance...');
+                        try {
+                            letterGlitchInstance.destroy();
+                        } catch(e) {
+                            console.error('Error destroying LetterGlitch:', e);
+                        }
+                        letterGlitchInstance = null;
+                    }
+                    
+                    console.log('Initializing LetterGlitch...');
+                    // Wait for script to load
+                    if (typeof LetterGlitch === 'undefined') {
+                        console.warn('LetterGlitch class not loaded yet, retrying...');
+                        setTimeout(() => initPageBackground(pageId), 100);
+                        return;
+                    }
+                    // Make container visible and wait for layout
+                    const container = document.getElementById('letter-glitch-bg-reference');
+                    if (container) {
+                        container.style.visibility = 'visible';
+                        container.style.opacity = '1';
+                        container.style.zIndex = '1';
+                        requestAnimationFrame(() => {
+                            initLetterGlitch();
+                        });
+                    } else {
+                        initLetterGlitch();
+                    }
+                }
+            };
+            
+            // Initialize the background for this page if init function exists
+            if (initMap[pageId]) {
+                initMap[pageId]();
+            } else {
+                // If already initialized, just show it
+                showBackgroundForPage(pageId);
+            }
+        }
+        
+        // NEW: Hide all backgrounds
+        function hideAllBackgrounds() {
+            const plasmaContainer = document.getElementById('plasma-bg-aboutme');
+            const terminalContainer = document.getElementById('terminal-bg-project');
+            const liquidContainer = document.getElementById('liquid-chrome-bg-contact');
+            const letterContainer = document.getElementById('letter-glitch-bg-reference');
+            
+            // Use opacity and z-index instead of display: none to preserve WebGL context
+            if (plasmaContainer) {
+                plasmaContainer.style.opacity = '0';
+                plasmaContainer.style.zIndex = '-10';
+                plasmaContainer.style.pointerEvents = 'none';
+                plasmaContainer.style.visibility = 'hidden';
+            }
+            if (terminalContainer) {
+                terminalContainer.style.opacity = '0';
+                terminalContainer.style.zIndex = '-10';
+                terminalContainer.style.pointerEvents = 'none';
+                terminalContainer.style.visibility = 'hidden';
+            }
+            if (liquidContainer) {
+                liquidContainer.style.opacity = '0';
+                liquidContainer.style.zIndex = '-10';
+                liquidContainer.style.pointerEvents = 'none';
+                liquidContainer.style.visibility = 'hidden';
+            }
+            if (letterContainer) {
+                letterContainer.style.opacity = '0';
+                letterContainer.style.zIndex = '-10';
+                letterContainer.style.pointerEvents = 'none';
+                letterContainer.style.visibility = 'hidden';
+            }
+            
+            // OPTIMIZED: Pause animations for hidden backgrounds
+            if (plasmaInstance && plasmaInstance.pause) plasmaInstance.pause();
+            if (terminalInstance && terminalInstance.pause) terminalInstance.pause();
+            if (liquidChromeInstance && liquidChromeInstance.pause) liquidChromeInstance.pause();
+            if (letterGlitchInstance && letterGlitchInstance.pause) letterGlitchInstance.pause();
+        }
+        
+        // NEW: Show background for specific page
+        function showBackgroundForPage(pageId) {
+            const backgrounds = {
+                'aboutMe': 'plasma-bg-aboutme',
+                'project': 'terminal-bg-project',
+                'contact': 'liquid-chrome-bg-contact',
+                'reference': 'letter-glitch-bg-reference'
+            };
+            
+            const containerId = backgrounds[pageId];
+            console.log('showBackgroundForPage called for:', pageId, 'containerId:', containerId);
+            if (containerId) {
+                const container = document.getElementById(containerId);
+                console.log('Container element:', container);
+                if (container) {
+                    // Use opacity and z-index instead of display
+                    container.style.opacity = '1';
+                    container.style.zIndex = '1';
+                    container.style.visibility = 'visible';
+                    container.style.pointerEvents = 'none'; // Don't block clicks
+                    console.log('Background shown:', containerId, 'Opacity:', container.style.opacity);
+                    
+                    // OPTIMIZED: Resume animation for the active background
+                    if (pageId === 'aboutMe' && plasmaInstance && plasmaInstance.resume) plasmaInstance.resume();
+                    if (pageId === 'project' && terminalInstance && terminalInstance.resume) terminalInstance.resume();
+                    if (pageId === 'contact' && liquidChromeInstance && liquidChromeInstance.resume) liquidChromeInstance.resume();
+                    if (pageId === 'reference' && letterGlitchInstance && letterGlitchInstance.resume) letterGlitchInstance.resume();
+                    
+                    // FIXED: Trigger resize for LetterGlitch when showing - use double RAF
+                    if (pageId === 'reference' && letterGlitchInstance) {
+                        console.log('Triggering LetterGlitch resize...');
+                        // Wait for container to be fully visible
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(() => {
+                                if (letterGlitchInstance && letterGlitchInstance.resizeCanvas) {
+                                    console.log('Calling resizeCanvas...');
+                                    letterGlitchInstance.resizeCanvas();
+                                }
+                            });
+                        });
+                    }
+                } else {
+                    console.error('Container not found:', containerId);
+                }
+            }
+        }
+        
+        // NEW: Add scroll listener to page for navigation
+        function addPageScrollListener(pageElement) {
+            if (!pageElement) return;
+            
+            // Store bound function for proper removal
+            if (!pageElement._scrollHandler) {
+                pageElement._scrollHandler = function(e) {
+                    handlePageScroll(e, pageElement);
+                };
+            }
+            
+            // Remove existing listener if any
+            pageElement.removeEventListener('wheel', pageElement._scrollHandler);
+            
+            // Add new listener
+            pageElement.addEventListener('wheel', pageElement._scrollHandler, { passive: false });
+        }
+        
+        // NEW: Handle scroll within pages to navigate between them
+        function handlePageScroll(e, pageElement) {
+            if (isAnimating) {
+                e.preventDefault();
+                return;
+            }
+            
+            const scrollTop = pageElement.scrollTop;
+            const scrollHeight = pageElement.scrollHeight;
+            const clientHeight = pageElement.clientHeight;
+            
+            const isAtTop = scrollTop <= 1; // Small threshold for top
+            const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1; // Small threshold for bottom
+            
+            console.log('Scroll event:', {
+                deltaY: e.deltaY,
+                scrollTop,
+                scrollHeight,
+                clientHeight,
+                isAtTop,
+                isAtBottom,
+                currentPage: pageOrder[currentPageIndex]
+            });
+            
+            // Scrolling down at bottom → go to next page
+            if (e.deltaY > 0 && isAtBottom) {
+                e.preventDefault();
+                console.log('Attempting to go to next page from', pageOrder[currentPageIndex]);
+                goToNextPage();
+            }
+            // Scrolling up at top → go to previous page
+            else if (e.deltaY < 0 && isAtTop) {
+                e.preventDefault();
+                console.log('Attempting to go to previous page from', pageOrder[currentPageIndex]);
+                goToPreviousPage();
+            }
+        }
+        
+        // NEW: Navigate to next page
+        function goToNextPage() {
+            if (currentPageIndex < pageOrder.length - 1) {
+                const nextPageId = pageOrder[currentPageIndex + 1];
+                transitionToPage(nextPageId, 'down');
+            }
+        }
+        
+        // NEW: Navigate to previous page
+        function goToPreviousPage() {
+            if (currentPageIndex > 0) {
+                const prevPageId = pageOrder[currentPageIndex - 1];
+                transitionToPage(prevPageId, 'up');
+            } else {
+                // If at first page, go back to home
+                transitionToHome();
+            }
+        }
+        
+        // NEW: Transition to another page with animation
+        function transitionToPage(newPageId, direction) {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const oldPageElement = activePageElement;
+            const newPageElement = pages[newPageId];
+            
+            if (!newPageElement) {
+                isAnimating = false;
+                return;
+            }
+            
+            // Ensure home button is visible
+            if (homeButton) homeButton.classList.remove('hidden');
+            
+            // IMPORTANT: Initialize background BEFORE showing the page
+            initPageBackground(newPageId);
+            
+            // Remove scroll listener from old page
+            if (oldPageElement && oldPageElement._scrollHandler) {
+                oldPageElement.removeEventListener('wheel', oldPageElement._scrollHandler);
+            }
+            
+            // Animate out old page
+            const translateYOut = direction === 'down' ? '-100%' : '100%';
+            anime({
+                targets: oldPageElement,
+                translateY: translateYOut,
+                opacity: 0,
+                duration: 600,
+                easing: 'easeInOutQuad',
+                complete: function() {
+                    oldPageElement.classList.add('hidden');
+                    anime.set(oldPageElement, { translateY: 0, opacity: 1 });
+                }
+            });
+            
+            // Show and animate in new page
+            const translateYStart = direction === 'down' ? '100%' : '-100%';
+            newPageElement.classList.remove('hidden');
+            newPageElement.scrollTop = 0; // Reset scroll position
+            activePageElement = newPageElement;
+            currentPageIndex = pageOrder.indexOf(newPageId);
+            
+            // Animate glass panel entrance
+            const glassPanel = newPageElement.querySelector('.glass-panel');
+            if (glassPanel) {
+                anime.set(glassPanel, { opacity: 0, translateY: 20 });
+            }
+            
+            anime.set(newPageElement, { translateY: translateYStart, opacity: 0 });
+            anime({
+                targets: newPageElement,
+                translateY: 0,
+                opacity: 1,
+                duration: 600,
+                easing: 'easeInOutQuad',
+                complete: function() {
+                    isAnimating = false;
+                    
+                    // FIXED: Additional resize for LetterGlitch after animation completes
+                    if (newPageId === 'reference' && letterGlitchInstance) {
+                        setTimeout(() => {
+                            if (letterGlitchInstance && letterGlitchInstance.resizeCanvas) {
+                                console.log('Post-animation LetterGlitch resize...');
+                                letterGlitchInstance.resizeCanvas();
+                            }
+                        }, 100);
+                    }
+                    
+                    // Animate glass panel after page slides in
+                    if (glassPanel) {
+                        anime({
+                            targets: glassPanel,
+                            opacity: 1,
+                            translateY: 0,
+                            duration: 600,
+                            easing: 'easeOutSine',
+                            complete: function() {
+                                animateContinuousHover(newPageId);
+                            }
+                        });
+                    }
+                    
+                    // Run heading animation
+                    animateHeadingCharSlide(newPageId);
+                    
+                    // Start bouncing logo
+                    startBouncingLogo();
+                    
+                    // Add scroll listener to new page
+                    setTimeout(() => {
+                        addPageScrollListener(newPageElement);
+                        console.log('Scroll listener added to', newPageId);
+                    }, 100);
+                }
+            });
+        }
+        
+        // NEW: Transition back to home
+        function transitionToHome() {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const oldPageElement = activePageElement;
+            
+            // Animate out current page
+            anime({
+                targets: oldPageElement,
+                translateY: '100%',
+                opacity: 0,
+                duration: 600,
+                easing: 'easeInOutQuad',
+                complete: function() {
+                    oldPageElement.classList.add('hidden');
+                    anime.set(oldPageElement, { translateY: 0, opacity: 1 });
+                    
+                    // Show home page
+                    if (mainContent) mainContent.classList.remove('hidden');
+                    if (homeButton) homeButton.classList.add('hidden');
+                    activePageElement = null;
+                    currentPageIndex = -1;
+                    
+                    // Add on-home class to body
+                    document.body.classList.add('on-home');
+                    
+                    // Clean up
+                    Object.values(panelAnimationInstances).forEach(instance => {
+                        if (instance) instance.pause();
+                    });
+                    Object.keys(pages).forEach(pageId => {
+                        if (!pages[pageId]) return;
+                        if (headingAnimationInstances[pageId]) {
+                            anime.remove(headingAnimationInstances[pageId].targets);
+                            delete headingAnimationInstances[pageId];
+                        }
+                    });
+                    
+                    // Hide all backgrounds (don't destroy them)
+                    hideAllBackgrounds();
+                    
+                    stopBouncingLogo();
+                    animateUIIn();
+                    
+                    // Restart 3D animation
+                    if (!animationFrameId) {
+                        animate();
+                    }
+                    
+                    isAnimating = false;
+                }
+            });
         }
 
         if(links.aboutMe) links.aboutMe.addEventListener('click', () => showPage('aboutMe'));
@@ -1802,37 +2552,22 @@
         console.log('%cContact: daniellong1109@gmail.com for licensing inquiries.', 'color: #00ff00; font-size: 12px;');
         console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #666666;');
         
-        // --- COPYRIGHT PROTECTION: Disable right-click (optional - can be bypassed) ---
-        document.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            console.warn('Right-click disabled. © 2025 Daniel Long');
-        });
-        
-        // --- COPYRIGHT PROTECTION: Disable common copy shortcuts ---
-        document.addEventListener('keydown', (e) => {
-            // Disable Ctrl+U (view source), Ctrl+S (save), F12 (devtools)
-            if ((e.ctrlKey && (e.key === 'u' || e.key === 's')) || e.key === 'F12') {
-                e.preventDefault();
-                console.warn('Action disabled. © 2025 Daniel Long');
-            }
-        });
+        // --- REMOVED: Right-click and keyboard shortcuts protection for development ---
+        // (Re-enable in production if needed)
         
         // --- SYNCHRONIZATION POINT ---
         window.addEventListener('load', () => {
              init();
              animate(); // Start 3D animation loop
              
-             // Load FaultyTerminal script
+             // Load all background scripts at once
+             console.log('Loading all background scripts...');
              loadFaultyTerminalScript();
-             
-             // Load LetterGlitch script
              loadLetterGlitchScript();
-             
-             // Load Plasma script
              loadPlasmaScript();
-             
-             // Load LiquidChrome script
              loadLiquidChromeScript();
+             loadClickSparkScript(); // Load click spark effect
+             loadMetallicPaintScript(); // Load metallic paint then card navigation
              
              // Time and Weather setup moved here
              updateTime(); 
@@ -1958,6 +2693,30 @@
             rainy: `
                 <path d="M4.158 12.025a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317" fill="#4682B4"/>
                 <path d="M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973" fill="currentColor" opacity="0.7"/>
+            `,
+            lightRain: `
+                <path d="M5.158 12.025a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317" fill="#87CEEB"/>
+                <path d="M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973" fill="currentColor" opacity="0.6"/>
+            `,
+            rain: `
+                <path d="M4.158 12.025a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m3 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317" fill="#4682B4"/>
+                <path d="M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973" fill="currentColor" opacity="0.7"/>
+            `,
+            heavyRain: `
+                <path d="M3.158 12.025a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m2 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m2 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m2 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m2 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317m2 0a.5.5 0 0 1 .316.633l-.5 1.5a.5.5 0 0 1-.948-.316l.5-1.5a.5.5 0 0 1 .632-.317" fill="#1E3A8A"/>
+                <path d="M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973" fill="currentColor" opacity="0.8"/>
+            `,
+            fog: `
+                <path d="M2 8h12M2 10h12M2 12h12" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+                <path d="M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973" fill="currentColor" opacity="0.4"/>
+            `,
+            snow: `
+                <path d="M8 1v14M1 8h14M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="currentColor" stroke-width="1" opacity="0.6"/>
+                <circle cx="8" cy="3" r="0.8" fill="currentColor" opacity="0.8"/>
+                <circle cx="8" cy="13" r="0.8" fill="currentColor" opacity="0.8"/>
+                <circle cx="3" cy="8" r="0.8" fill="currentColor" opacity="0.8"/>
+                <circle cx="13" cy="8" r="0.8" fill="currentColor" opacity="0.8"/>
+                <path d="M13.405 7.027a5.001 5.001 0 0 0-9.499-1.004A3.5 3.5 0 1 0 3.5 13H13a3 3 0 0 0 .405-5.973" fill="currentColor" opacity="0.5"/>
             `, 
             thunder: `
                 <path d="M5.301 3.164a.5.5 0 0 1 .59.037L9.5 5.5h2.02a.5.5 0 0 1 .454.72l-2 4a.5.5 0 0 1-.884-.437L9.08 7.5H7.5a.5.5 0 0 1-.454-.72l2-4a.5.5 0 0 1 .255-.276" fill="#FDB813" style="z-index: 2;"/>
@@ -1972,29 +2731,55 @@
         };
 
         // Maps WMO codes to text and icon
-        function getWeatherDetails(code, isDay = 1) { // UPDATED: Added isDay flag
-            // WMO Weather interpretation codes
+        function getWeatherDetails(code, isDay = 1) {
+            // WMO Weather interpretation codes with detailed icons
             const codes = {
                 0: { text: "Clear sky", icon: isDay ? weatherIcons.sunny : weatherIcons.nightClear },
                 1: { text: "Mainly clear", icon: isDay ? weatherIcons.sunny : weatherIcons.nightClear },
                 2: { text: "Partly cloudy", icon: isDay ? weatherIcons.partlyCloudyDay : weatherIcons.partlyCloudyNight },
                 3: { text: "Overcast", icon: weatherIcons.cloudy },
-                45: { text: "Fog", icon: weatherIcons.cloudy },
-                48: { text: "Depositing rime fog", icon: weatherIcons.cloudy },
-                51: { text: "Light drizzle", icon: weatherIcons.rainy },
-                53: { text: "Moderate drizzle", icon: weatherIcons.rainy },
-                55: { text: "Dense drizzle", icon: weatherIcons.rainy },
-                61: { text: "Slight rain", icon: weatherIcons.rainy },
-                63: { text: "Moderate rain", icon: weatherIcons.rainy },
-                66: { text: "Light freezing rain", icon: weatherIcons.rainy },
-                80: { text: "Slight rain showers", icon: weatherIcons.rainy },
-                81: { text: "Moderate rain showers", icon: weatherIcons.rainy },
-                82: { text: "Violent rain showers", icon: weatherIcons.rainy },
+                45: { text: "Fog", icon: weatherIcons.fog },
+                48: { text: "Depositing rime fog", icon: weatherIcons.fog },
+                51: { text: "Light drizzle", icon: weatherIcons.lightRain },
+                53: { text: "Moderate drizzle", icon: weatherIcons.lightRain },
+                55: { text: "Dense drizzle", icon: weatherIcons.rain },
+                56: { text: "Light freezing drizzle", icon: weatherIcons.lightRain },
+                57: { text: "Dense freezing drizzle", icon: weatherIcons.rain },
+                61: { text: "Slight rain", icon: weatherIcons.lightRain },
+                63: { text: "Moderate rain", icon: weatherIcons.rain },
+                65: { text: "Heavy rain", icon: weatherIcons.heavyRain },
+                66: { text: "Light freezing rain", icon: weatherIcons.lightRain },
+                67: { text: "Heavy freezing rain", icon: weatherIcons.heavyRain },
+                71: { text: "Slight snow fall", icon: weatherIcons.snow },
+                73: { text: "Moderate snow fall", icon: weatherIcons.snow },
+                75: { text: "Heavy snow fall", icon: weatherIcons.snow },
+                77: { text: "Snow grains", icon: weatherIcons.snow },
+                80: { text: "Slight rain showers", icon: weatherIcons.lightRain },
+                81: { text: "Moderate rain showers", icon: weatherIcons.rain },
+                82: { text: "Violent rain showers", icon: weatherIcons.heavyRain },
+                85: { text: "Slight snow showers", icon: weatherIcons.snow },
+                86: { text: "Heavy snow showers", icon: weatherIcons.snow },
                 95: { text: "Thunderstorm", icon: weatherIcons.thunder },
-                96: { text: "Thunderstorm, slight hail", icon: weatherIcons.thunder },
-                99: { text: "Thunderstorm, heavy hail", icon: weatherIcons.thunder }
+                96: { text: "Thunderstorm with slight hail", icon: weatherIcons.thunder },
+                99: { text: "Thunderstorm with heavy hail", icon: weatherIcons.thunder }
             };
-            return codes[code] || { text: "Clear", icon: isDay ? weatherIcons.sunny : weatherIcons.nightClear }; // Default to clear
+            return codes[code] || { text: "Clear", icon: isDay ? weatherIcons.sunny : weatherIcons.nightClear };
+        }
+
+        // Get short weather text for forecast display
+        function getShortWeatherText(code) {
+            const shortText = {
+                0: "Clear", 1: "Clear", 2: "Partly Cloudy", 3: "Cloudy",
+                45: "Fog", 48: "Fog",
+                51: "Light Rain", 53: "Light Rain", 55: "Rain", 56: "Freezing Rain", 57: "Freezing Rain",
+                61: "Light Rain", 63: "Rain", 65: "Heavy Rain",
+                66: "Freezing Rain", 67: "Heavy Rain",
+                71: "Snow", 73: "Snow", 75: "Heavy Snow", 77: "Snow",
+                80: "Light Showers", 81: "Showers", 82: "Heavy Showers",
+                85: "Snow", 86: "Heavy Snow",
+                95: "Thunderstorm", 96: "Thunderstorm", 99: "Thunderstorm"
+            };
+            return shortText[code] || "Clear";
         }
 
         async function fetchWeather() {
@@ -2087,30 +2872,23 @@
                         const hourlyTemp = Math.round(hourlyData.temperature_2m[i]);
                         const hourlyCode = hourlyData.weather_code[i];
                         const hourlyPrecip = hourlyData.precipitation_probability[i];
-                        const hourlyIsDay = hourlyData.is_day[i]; // NEW: Get hourly is_day
-                        let hourlyWeatherDetails = getWeatherDetails(hourlyCode, hourlyIsDay); // UPDATED: Pass hourly is_day
+                        const hourlyIsDay = hourlyData.is_day[i];
+                        let hourlyWeatherDetails = getWeatherDetails(hourlyCode, hourlyIsDay);
                         
                         const item = document.createElement('div');
                         item.className = 'forecast-item';
                         
                         let tempLabel = `${hourlyTemp}°`;
-                        let iconPaths = hourlyWeatherDetails.icon; // Use paths string
-
-                        // --- NEW: Sunset Logic ---
-                        // Check if this hour is the sunset hour
-                        if (hour === sunsetHour) {
-                             timeLabel = sunsetTime; // Use exact sunset time e.g., "18:56"
-                             tempLabel = "Sunset";
-                             iconPaths = weatherIcons.sunset; // Use sunset icon
-                        }
+                        let iconPaths = hourlyWeatherDetails.icon;
+                        let weatherText = getShortWeatherText(hourlyCode);
 
                         item.innerHTML = `
-                            <span>${timeLabel}</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+                            <span style="font-size: 0.75em;">${timeLabel}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" title="${hourlyWeatherDetails.text}">
                                 ${iconPaths}
                             </svg>
                             <span class="temp">${tempLabel}</span>
-                            <span class="precip">${hourlyPrecip}%</span>
+                            <span class="precip" style="font-size: 0.65em; font-weight: 500;">${weatherText}</span>
                         `;
                         forecastContainer.appendChild(item);
                     }
@@ -2190,7 +2968,7 @@
         function loadFaultyTerminalScript() {
             console.log('Loading FaultyTerminal script...');
             const script = document.createElement('script');
-            script.src = 'FaultyTerminal.js';
+            script.src = './FaultyTerminal.js';
             script.onload = () => {
                 console.log('FaultyTerminal script loaded successfully');
             };
@@ -2228,12 +3006,12 @@
             console.log('Creating LetterGlitch instance...');
             
             try {
-                // Create new LetterGlitch instance
+                // OPTIMIZED: Performance settings with smooth transitions
                 letterGlitchInstance = new LetterGlitch(letterGlitchContainer, {
-                    glitchSpeed: 50,
+                    glitchSpeed: 150, // Slower = less CPU usage
                     centerVignette: true,
                     outerVignette: false,
-                    smooth: true
+                    smooth: true // Enable smooth transitions for better visual
                 });
                 console.log('LetterGlitch instance created successfully!', letterGlitchInstance);
             } catch (error) {
@@ -2245,7 +3023,7 @@
         function loadLetterGlitchScript() {
             console.log('Loading LetterGlitch script...');
             const script = document.createElement('script');
-            script.src = 'LetterGlitch.js';
+            script.src = './LetterGlitch.js';
             script.onload = () => {
                 console.log('LetterGlitch script loaded successfully');
             };
@@ -2302,7 +3080,7 @@
         function loadPlasmaScript() {
             console.log('Loading Plasma script...');
             const script = document.createElement('script');
-            script.src = 'Plasma.js';
+            script.src = './Plasma.js';
             script.onload = () => {
                 console.log('Plasma script loaded successfully');
             };
@@ -2359,7 +3137,7 @@
         function loadLiquidChromeScript() {
             console.log('Loading LiquidChrome script...');
             const script = document.createElement('script');
-            script.src = 'LiquidChrome.js';
+            script.src = './LiquidChrome.js';
             script.onload = () => {
                 console.log('LiquidChrome script loaded successfully');
             };
@@ -2367,6 +3145,167 @@
                 console.error('Failed to load LiquidChrome.js');
             };
             document.head.appendChild(script);
+        }
+
+        // --- ClickSpark Effect Logic ---
+        let clickSparkInstance = null;
+
+        function initClickSpark() {
+            console.log('Initializing ClickSpark...');
+            if (typeof ClickSpark === 'undefined') {
+                console.error('ClickSpark class not found!');
+                return;
+            }
+
+            try {
+                // Determine color based on current theme
+                const isDark = document.documentElement.classList.contains('dark');
+                const sparkColor = isDark ? '#ffffff' : '#000000';
+
+                clickSparkInstance = new ClickSpark({
+                    sparkColor: sparkColor,
+                    sparkSize: 10,
+                    sparkRadius: 15,
+                    sparkCount: 8,
+                    duration: 400,
+                    easing: 'ease-out'
+                });
+                console.log('ClickSpark initialized successfully with color:', sparkColor);
+            } catch (error) {
+                console.error('Error creating ClickSpark:', error);
+            }
+        }
+
+        // Update ClickSpark color when theme changes
+        function updateClickSparkColor() {
+            if (!clickSparkInstance) return;
+            
+            const isDark = document.documentElement.classList.contains('dark');
+            clickSparkInstance.options.sparkColor = isDark ? '#ffffff' : '#000000';
+            console.log('ClickSpark color updated:', clickSparkInstance.options.sparkColor);
+        }
+
+        // Load the ClickSpark script
+        function loadClickSparkScript() {
+            console.log('Loading ClickSpark script...');
+            const script = document.createElement('script');
+            script.src = './ClickSpark.js';
+            script.onload = () => {
+                console.log('ClickSpark script loaded successfully');
+                initClickSpark();
+            };
+            script.onerror = () => {
+                console.error('Failed to load ClickSpark.js');
+            };
+            document.head.appendChild(script);
+        }
+
+        // Load the MetallicPaint script first
+        function loadMetallicPaintScript() {
+            console.log('Loading MetallicPaint script...');
+            const script = document.createElement('script');
+            script.src = './MetallicPaint.js';
+            script.onload = () => {
+                console.log('MetallicPaint script loaded successfully');
+                loadCardNavScript();
+            };
+            script.onerror = () => {
+                console.error('Failed to load MetallicPaint.js');
+                loadCardNavScript(); // Still load CardNav even if MetallicPaint fails
+            };
+            document.head.appendChild(script);
+        }
+
+        // Load the CardNav script
+        function loadCardNavScript() {
+            console.log('Loading CardNav script...');
+            const script = document.createElement('script');
+            script.src = './CardNav.js';
+            script.onload = () => {
+                console.log('CardNav script loaded successfully');
+                initCardNav();
+            };
+            script.onerror = () => {
+                console.error('Failed to load CardNav.js');
+            };
+            document.head.appendChild(script);
+        }
+
+        // Initialize CardNav with navigation items
+        function initCardNav() {
+            console.log('initCardNav called');
+            
+            if (typeof CardNav === 'undefined') {
+                console.error('CardNav class not found');
+                return;
+            }
+
+            const container = document.getElementById('card-nav');
+            if (!container) {
+                console.error('CardNav container not found');
+                return;
+            }
+
+            console.log('CardNav container found:', container);
+
+            // Define navigation items
+            const navItems = [
+                {
+                    label: "Home",
+                    pageId: "home",
+                    bgColor: "#E8E8E8",
+                    bgColorDark: "#3A3A3A",
+                    bgEffect: "",
+                    textColor: "#1f2937",
+                    textColorDark: "#fff"
+                },
+                {
+                    label: "About Me",
+                    pageId: "aboutMe",
+                    bgColor: "#E0E0E0",
+                    bgColorDark: "#2F2F2F",
+                    bgEffect: "plasma",
+                    textColor: "#1f2937",
+                    textColorDark: "#fff"
+                },
+                {
+                    label: "Project",
+                    pageId: "project",
+                    bgColor: "#DADADA",
+                    bgColorDark: "#404040",
+                    bgEffect: "terminal",
+                    textColor: "#1f2937",
+                    textColorDark: "#fff"
+                },
+                {
+                    label: "Contact",
+                    pageId: "contact",
+                    bgColor: "#D4D4D4",
+                    bgColorDark: "#353535",
+                    bgEffect: "liquid-chrome",
+                    textColor: "#1f2937",
+                    textColorDark: "#fff"
+                },
+                {
+                    label: "Reference",
+                    pageId: "reference",
+                    bgColor: "#DEDEDE",
+                    bgColorDark: "#3C3C3C",
+                    bgEffect: "letter-glitch",
+                    textColor: "#1f2937",
+                    textColorDark: "#fff"
+                }
+            ];
+
+            // Initialize CardNav
+            const cardNav = new CardNav(container, {
+                logo: '',
+                items: navItems,
+                baseColor: '#fff',
+                menuColor: '#000'
+            });
+
+            console.log('CardNav initialized');
         }
 
     </script>

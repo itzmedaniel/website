@@ -16,7 +16,9 @@ class LetterGlitch {
     this.context = null;
     this.animationId = null;
     this.lastGlitchTime = Date.now();
+    this.isPaused = false; // OPTIMIZED: Track pause state
 
+    // Keep original character size for better visual quality
     this.fontSize = 16;
     this.charWidth = 10;
     this.charHeight = 20;
@@ -77,20 +79,32 @@ class LetterGlitch {
   }
 
   init() {
-    // Create wrapper div
+    // FIXED: Create wrapper with FIXED positioning (not absolute)
     const wrapper = document.createElement('div');
-    wrapper.style.position = 'relative';
-    wrapper.style.width = '100%';
-    wrapper.style.height = '100%';
+    wrapper.style.position = 'fixed';
+    wrapper.style.top = '0';
+    wrapper.style.left = '0';
+    wrapper.style.right = '0';
+    wrapper.style.bottom = '0';
+    wrapper.style.width = '100vw';
+    wrapper.style.height = '100vh';
+    wrapper.style.minHeight = '100vh';
     wrapper.style.backgroundColor = '#000000';
     wrapper.style.overflow = 'hidden';
+    wrapper.style.zIndex = '0'; // Behind everything
     this.container.appendChild(wrapper);
+    this.wrapper = wrapper; // Store reference
 
     // Create canvas
     const canvas = document.createElement('canvas');
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
     canvas.style.display = 'block';
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
+    canvas.style.width = '100vw';
+    canvas.style.height = '100vh';
+    canvas.style.minHeight = '100vh';
+    canvas.style.zIndex = '1';
     wrapper.appendChild(canvas);
     this.canvas = canvas;
 
@@ -141,26 +155,37 @@ class LetterGlitch {
   resizeCanvas() {
     const canvas = this.canvas;
     if (!canvas) return;
-    const parent = canvas.parentElement;
-    if (!parent) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2); // OPTIMIZED: Cap DPR at 2
-    const scale = 0.75; // OPTIMIZED: Render at 75% resolution
-    const rect = parent.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2); // Back to 2 for better quality
+    const scale = 0.75; // Back to 75% resolution for better quality
+    
+    // FIXED: Always use window dimensions for fixed backgrounds
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    
+    // FIXED: Force wrapper to be full size every time
+    if (this.wrapper) {
+      this.wrapper.style.width = `${width}px`;
+      this.wrapper.style.height = `${height}px`;
+      this.wrapper.style.minHeight = `${height}px`;
+    }
 
-    canvas.width = rect.width * dpr * scale;
-    canvas.height = rect.height * dpr * scale;
+    canvas.width = width * dpr * scale;
+    canvas.height = height * dpr * scale;
 
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
+    // FIXED: Force canvas style dimensions
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    canvas.style.minHeight = `${height}px`;
 
     if (this.context) {
       this.context.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
     }
 
-    const { columns, rows } = this.calculateGrid(rect.width, rect.height);
+    const { columns, rows } = this.calculateGrid(width, height);
     this.initializeLetters(columns, rows);
 
+    console.log('LetterGlitch canvas resized:', { width, height, columns, rows, canvasActualWidth: canvas.width, canvasActualHeight: canvas.height });
     this.drawLetters();
   }
 
@@ -183,7 +208,8 @@ class LetterGlitch {
   updateLetters() {
     if (!this.letters || this.letters.length === 0) return;
 
-    const updateCount = Math.max(1, Math.floor(this.letters.length * 0.05));
+    // OPTIMIZED: Update 2% of letters for balance between performance and animation
+    const updateCount = Math.max(1, Math.floor(this.letters.length * 0.02));
 
     for (let i = 0; i < updateCount; i++) {
       const index = Math.floor(Math.random() * this.letters.length);
@@ -223,6 +249,9 @@ class LetterGlitch {
   }
 
   animate() {
+    // OPTIMIZED: Don't animate if paused
+    if (this.isPaused) return;
+    
     const now = Date.now();
     if (now - this.lastGlitchTime >= this.options.glitchSpeed) {
       this.updateLetters();
@@ -237,6 +266,24 @@ class LetterGlitch {
     this.animationId = requestAnimationFrame(() => this.animate());
   }
 
+  // OPTIMIZED: Pause animation
+  pause() {
+    this.isPaused = true;
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
+    }
+  }
+
+  // OPTIMIZED: Resume animation
+  resume() {
+    if (!this.isPaused) return;
+    this.isPaused = false;
+    if (!this.animationId) {
+      this.animate();
+    }
+  }
+
   destroy() {
     console.log('LetterGlitch: Destroying instance');
     if (this.animationId) {
@@ -246,8 +293,8 @@ class LetterGlitch {
     if (this.handleResize) {
       window.removeEventListener('resize', this.handleResize);
     }
-    if (this.canvas && this.canvas.parentElement) {
-      this.container.removeChild(this.canvas.parentElement);
+    if (this.wrapper && this.wrapper.parentElement) {
+      this.container.removeChild(this.wrapper);
     }
   }
 }
