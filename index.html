@@ -1199,6 +1199,105 @@
             }
 
             /* MOBILE OPTIMIZATION: Simplify Homepage Layout */
+            /* --- MOBILE: Directory box draggable and UI even smaller --- */
+            #directory-box {
+                position: fixed !important;
+                z-index: 999 !important;
+                top: auto !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0.5rem !important;
+                margin: 0 auto !important;
+                width: 98vw !important;
+                max-width: 98vw !important;
+                min-width: 0 !important;
+                border-radius: 0.75rem !important;
+                box-shadow: 0 2px 12px rgba(0,0,0,0.12) !important;
+                touch-action: none !important;
+                cursor: grab !important;
+            }
+
+            #directory-handle {
+                display: flex !important;
+                cursor: grab !important;
+                background: rgba(0,0,0,0.04);
+                border-radius: 0.5rem 0.5rem 0 0;
+                padding: 0.25rem 0.5rem !important;
+                font-size: 0.8rem !important;
+            }
+
+            /* UI even smaller for mobile */
+            html, body, #main-content, .glass-panel, .page-content, #top-left-ui, #directory-box, .nav-link, .nav-item, .item-title, .item-dot-canvas, .theme-btn, .contact-input, .project-item, .bouncing-orb, .bouncing-logo-element, .signature-watermark, .card-nav-container, .card-nav, .nav-tabs, .nav-tab, .tab-pane, .nav-section, .section-title, .section-subtitle, .timezone-grid, .info-item, #animated-title, #top-left-ui p, .forecast-item, #rain-radar-widget, #rain-radar-map, #sunset-info, .social-icon-link, .glass-panel h1, .glass-panel h2, .glass-panel h3, .glass-panel p, .glass-panel li, .contact-form, textarea.contact-input {
+                font-size: 0.7rem !important;
+                padding: 0.18rem !important;
+                margin: 0.12rem !important;
+                line-height: 1.15 !important;
+            }
+
+            .item-dot-canvas {
+                width: 12px !important;
+                height: 12px !important;
+            }
+
+            .home-button {
+                width: 22px !important;
+                height: 22px !important;
+                padding: 0.12rem !important;
+                font-size: 0.7rem !important;
+            }
+
+            .theme-btn {
+                padding: 0.12rem !important;
+                font-size: 0.7rem !important;
+                min-height: 20px !important;
+            }
+
+            .card-nav {
+                width: 20px !important;
+                height: 20px !important;
+            }
+
+            .card-nav.open {
+                width: 65px !important;
+            }
+
+            .card-nav-top {
+                width: 20px !important;
+                min-width: 20px !important;
+                min-height: 20px !important;
+            }
+
+            .hamburger-line {
+                width: 8px !important;
+            }
+
+            .signature-watermark {
+                font-size: 0.5rem !important;
+                bottom: 2px !important;
+                right: 2px !important;
+                padding: 0.06rem 0.12rem !important;
+            }
+
+            /* --- END: Directory draggable and UI smaller --- */
+
+            /* --- MOBILE KEYNOTE BANNER --- */
+            #mobile-keynote-banner {
+                display: block !important;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                z-index: 2000;
+                background: linear-gradient(90deg, #fbbf24 0%, #f59e42 100%);
+                color: #222;
+                font-size: 0.85rem;
+                font-weight: 700;
+                text-align: center;
+                padding: 0.5rem 0.2rem;
+                border-radius: 0 0 0.75rem 0.75rem;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                letter-spacing: 0.02em;
+            }
             /* --- MAKE ALL UI VERY SMALL ON MOBILE --- */
             html, body, #main-content, .glass-panel, .page-content, #top-left-ui, #directory-box, .nav-link, .nav-item, .item-title, .item-dot-canvas, .theme-btn, .contact-input, .project-item, .bouncing-orb, .bouncing-logo-element, .signature-watermark, .card-nav-container, .card-nav, .nav-tabs, .nav-tab, .tab-pane, .nav-section, .section-title, .section-subtitle, .timezone-grid, .info-item, #animated-title, #top-left-ui p, .forecast-item, #rain-radar-widget, #rain-radar-map, #sunset-info, .social-icon-link, .glass-panel h1, .glass-panel h2, .glass-panel h3, .glass-panel p, .glass-panel li, .contact-form, textarea.contact-input {
                 font-size: 0.85rem !important;
@@ -1539,6 +1638,91 @@
 </head>
 <!-- Removed padding from body -->
 <body class="min-h-screen overflow-hidden on-home">
+    <script>
+    // Instantly set welcome splash background and text color before DOM paints, force pure white or black, and correct text color
+    (function() {
+        var style = document.createElement('style');
+        var isDark = document.documentElement.classList.contains('dark') || window.matchMedia('(prefers-color-scheme: dark)').matches;
+        style.innerHTML = isDark
+            ? '#welcome-page{background:#000!important;} #welcome-letters{color:#fff!important;}'
+            : '#welcome-page{background:#fff!important;} #welcome-letters{color:#111!important;}';
+        document.head.appendChild(style);
+    })();
+    </script>
+
+    <!-- SIMPLE WELCOME PAGE (shows once per refresh) -->
+    <div id="welcome-page" style="position:fixed;z-index:3000;top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;opacity:1;will-change:opacity;">
+        <h1 id="welcome-letters" style="font-size:2.5rem;font-weight:800;letter-spacing:0.08em;will-change:opacity;">Welcome.</h1>
+    </div>
+    <style>
+    #welcome-letters span {
+        opacity: 0;
+        display: inline-block;
+        transform: translateY(40px);
+    }
+    </style>
+    <script>
+    // Use anime.js for smooth letter animation with a brief pause before fade out
+    window.addEventListener('DOMContentLoaded', function() {
+        var welcome = document.getElementById('welcome-page');
+        var letters = document.getElementById('welcome-letters');
+        var text = 'Welcome.';
+        letters.innerHTML = '';
+        for (let i = 0; i < text.length; ++i) {
+            var span = document.createElement('span');
+            span.textContent = text[i];
+            letters.appendChild(span);
+        }
+        var spans = letters.querySelectorAll('span');
+        
+        // Create a timeline for precise control
+        var timeline = anime.timeline();
+
+        timeline.add({
+            targets: spans,
+            opacity: [0, 1],
+            translateY: [40, 0],
+            easing: 'easeOutCubic',
+            duration: 800,
+            delay: anime.stagger(120)
+        });
+
+        // Add fade out after a brief pause (start ~150ms after letters finish)
+        timeline.add({
+            targets: [welcome, letters],
+            opacity: 0,
+            duration: 1200,
+            easing: 'easeInOutQuad',
+            begin: function(anim) {
+                // Debug logs to verify sequencing
+                console.log('Welcome fade begin (should be ~150ms after letters complete)');
+                // Ensure the browser optimizes the opacity transition
+                welcome.style.willChange = 'opacity';
+                letters.style.willChange = 'opacity';
+            },
+            complete: function() {
+                // Hide the welcome page after fade out completes
+                welcome.style.display = 'none';
+                // Clean up will-change
+                welcome.style.willChange = '';
+                letters.style.willChange = '';
+                console.log('Welcome fade complete - welcome element hidden');
+            }
+        }, '+=150');
+    });
+    </script>
+
+    <!-- MOBILE KEYNOTE BANNER: Only visible on mobile -->
+    <div id="mobile-keynote-banner" style="display:none;">
+        For best experience, use <b>Desktop Mode</b> in your browser settings!
+    </div>
+
+    <script>
+    // Show keynote banner only on mobile
+    if (window.innerWidth <= 768) {
+        document.getElementById('mobile-keynote-banner').style.display = 'block';
+    }
+    </script>
 
     <!-- FIXED: Background containers outside of page divs so they don't move with page animations -->
     <div id="backgrounds-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;">
