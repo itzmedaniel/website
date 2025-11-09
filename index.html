@@ -1652,13 +1652,17 @@
 
     <!-- SIMPLE WELCOME PAGE (shows once per refresh) -->
     <div id="welcome-page" style="position:fixed;z-index:3000;top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;opacity:1;will-change:opacity;">
-        <h1 id="welcome-letters" style="font-size:2.5rem;font-weight:800;letter-spacing:0.08em;will-change:opacity;">Welcome.</h1>
+        <!-- Use data-text to avoid showing the full text before JS runs -->
+        <h1 id="welcome-letters" data-text="Welcome." style="font-size:2.5rem;font-weight:800;letter-spacing:0.08em;will-change:opacity;visibility:hidden;"> </h1>
     </div>
     <style>
+    /* Hide plain text until JS replaces it (prevents flash of full text) */
+    #welcome-letters { visibility: hidden; }
     #welcome-letters span {
         opacity: 0;
         display: inline-block;
-        transform: translateY(40px);
+        transform: translateY(30px);
+        will-change: transform, opacity;
     }
     </style>
     <script>
@@ -1666,25 +1670,34 @@
     window.addEventListener('DOMContentLoaded', function() {
         var welcome = document.getElementById('welcome-page');
         var letters = document.getElementById('welcome-letters');
-        var text = 'Welcome.';
+        // Read text from data attribute to avoid any FOUC
+        var text = letters.getAttribute('data-text') || 'Welcome.';
+
+        // Build spans using a DocumentFragment to avoid multiple reflows
         letters.innerHTML = '';
+        var frag = document.createDocumentFragment();
         for (let i = 0; i < text.length; ++i) {
             var span = document.createElement('span');
             span.textContent = text[i];
-            letters.appendChild(span);
+            frag.appendChild(span);
         }
+        letters.appendChild(frag);
         var spans = letters.querySelectorAll('span');
-        
-        // Create a timeline for precise control
-        var timeline = anime.timeline();
 
+        // Make the letters container visible now that spans are in place
+        letters.style.visibility = 'visible';
+
+        // Create a timeline for precise control
+        var timeline = anime.timeline({ autoplay: false });
+
+        // Use a slightly smaller translate and tighter stagger to feel snappier
         timeline.add({
             targets: spans,
             opacity: [0, 1],
-            translateY: [40, 0],
-            easing: 'easeOutCubic',
-            duration: 800,
-            delay: anime.stagger(120)
+            translateY: [30, 0],
+            easing: 'cubicBezier(.22,.11,.26,1)',
+            duration: 700,
+            delay: anime.stagger(90)
         });
 
         // Add fade out after a brief pause (start ~150ms after letters finish)
@@ -1709,6 +1722,13 @@
                 console.log('Welcome fade complete - welcome element hidden');
             }
         }, '+=150');
+
+        // Start the timeline on the next frame so layout has settled
+        requestAnimationFrame(function() {
+            // A trivial read to force layout before starting animation
+            void letters.offsetHeight;
+            timeline.play();
+        });
     });
     </script>
 
