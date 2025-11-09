@@ -1,155 +1,135 @@
-// Vanilla JS version of CardNav - Vertical Right Side
+// Vanilla JS version of CardNav - Simple Horizontal Navigation
 class CardNav {
   constructor(container, options = {}) {
     this.container = container;
-    this.options = {
-      logo: options.logo || '',
-      logoAlt: options.logoAlt || 'Logo',
-      items: options.items || [],
-      baseColor: options.baseColor || '#fff',
-      menuColor: options.menuColor || '#000'
-    };
-
-    this.isHamburgerOpen = false;
-    this.isExpanded = false;
+    this.options = { categories: options.categories || [] };
     this.navEl = null;
-    this.cardsRefs = [];
-
+    this.metallicInstances = [];
     this.init();
   }
-
   init() {
     this.render();
     this.attachEventListeners();
+    this.initMetallicDots();
   }
-
   render() {
-    const isDark = document.documentElement.classList.contains('dark');
-    
-    const navHTML = `
-      <nav class="card-nav">
-        <div class="card-nav-top">
-          <div class="hamburger-menu" role="button" aria-label="Open menu" tabindex="0">
-            <div class="hamburger-line"></div>
-            <div class="hamburger-line"></div>
-          </div>
-        </div>
-
-        <div class="card-nav-content" aria-hidden="true">
-          ${this.options.items.map((item, idx) => {
-            const bgColor = isDark ? (item.bgColorDark || item.bgColor) : item.bgColor;
-            const textColor = isDark ? (item.textColorDark || item.textColor) : item.textColor;
-            const pageId = item.pageId || '';
-            return `
-              <div class="nav-card-link-wrapper" data-page-id="${pageId}" role="button" tabindex="0">
-                <div class="nav-card" style="background-color: ${bgColor}; color: ${textColor};">
-                  <div class="nav-card-label">${item.label}</div>
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      </nav>
-    `;
-
+    const allSections = this.options.categories.flatMap(cat => cat.sections);
+    const navHTML = `<nav class="card-nav"><div class="nav-items">${allSections.map(section => `<button class="nav-item" data-page-id="${section.pageId}"><canvas class="item-dot-canvas" data-text="●"></canvas><span class="item-title">${section.title}</span></button>`).join('')}</div></nav>`;
     this.container.innerHTML = navHTML;
     this.navEl = this.container.querySelector('.card-nav');
-    this.cardsRefs = Array.from(this.container.querySelectorAll('.nav-card'));
   }
-
-  toggleMenu() {
-    console.log('CardNav: toggleMenu called');
-    const hamburger = this.container.querySelector('.hamburger-menu');
-    const content = this.container.querySelector('.card-nav-content');
-
-    if (!this.isExpanded) {
-      console.log('CardNav: Opening menu');
-      this.isHamburgerOpen = true;
-      this.isExpanded = true;
-      hamburger.classList.add('open');
-      hamburger.setAttribute('aria-label', 'Close menu');
-      this.navEl.classList.add('open');
-      content.setAttribute('aria-hidden', 'false');
-    } else {
-      console.log('CardNav: Closing menu');
-      this.isHamburgerOpen = false;
-      this.isExpanded = false;
-      hamburger.classList.remove('open');
-      hamburger.setAttribute('aria-label', 'Open menu');
-      this.navEl.classList.remove('open');
-      content.setAttribute('aria-hidden', 'true');
-    }
-  }
-
-  attachEventListeners() {
-    const hamburger = this.container.querySelector('.hamburger-menu');
-    console.log('CardNav: Attaching event listeners to hamburger:', hamburger);
-    if (hamburger) {
-      hamburger.addEventListener('click', (e) => {
-        console.log('CardNav: Hamburger clicked!', e);
-        this.toggleMenu();
-      });
-      hamburger.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          this.toggleMenu();
-        }
-      });
-    } else {
-      console.error('CardNav: Hamburger menu not found!');
-    }
-
-    // Add click handlers for navigation items
-    const navCards = this.container.querySelectorAll('.nav-card-link-wrapper');
-    navCards.forEach(card => {
-      card.style.cursor = 'pointer';
+  initMetallicDots() {
+    const canvases = this.container.querySelectorAll('.item-dot-canvas');
+    canvases.forEach(canvas => {
+      const text = canvas.getAttribute('data-text');
+      const imageData = this.createTextImageData(text);
       
-      card.addEventListener('click', (e) => {
-        const pageId = card.getAttribute('data-page-id');
-        if (pageId) {
-          e.preventDefault();
-          
-          // Handle home page separately
-          if (pageId === 'home') {
-            if (typeof window.showHomePage === 'function') {
-              window.showHomePage();
-            }
-          } else if (typeof window.showPage === 'function') {
-            window.showPage(pageId);
-          }
-          
-          // Close menu after navigation
-          this.toggleMenu();
-        }
+      if (window.MetallicPaint && imageData) {
+        const metallic = new window.MetallicPaint(canvas, imageData, {
+          patternScale: 0.8,
+          refraction: 0.12,
+          edge: 0.6,
+          patternBlur: 0.001,
+          liquid: 0.25,
+          speed: 0.3
+        });
+        this.metallicInstances.push(metallic);
+      }
+    });
+  }
+  createTextImageData(text) {
+    if (window.parseTextToImageData) {
+      return window.parseTextToImageData(text, {
+        fontSize: 32,
+        fontFamily: 'Arial, sans-serif',
+        fontWeight: 'bold',
+        padding: 5
       });
-
-      // Keyboard accessibility
-      card.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          const pageId = card.getAttribute('data-page-id');
-          if (pageId) {
-            // Handle home page separately
-            if (pageId === 'home') {
-              if (typeof window.showHomePage === 'function') {
-                window.showHomePage();
-              }
-            } else if (typeof window.showPage === 'function') {
-              window.showPage(pageId);
-            }
-            
-            // Close menu after navigation
-            this.toggleMenu();
-          }
+    }
+    return null;
+  }
+  createTextImageData(text) {
+    if (window.parseTextToImageData) {
+      return window.parseTextToImageData(text, {
+        fontSize: 20,
+        fontFamily: 'Arial, sans-serif',
+        fontWeight: '400',
+        padding: 2
+      });
+    }
+    return null;
+  }
+  createSquareImageData(color) {
+    const size = 128;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    
+    // Black background
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, size, size);
+    
+    // Create a gradient from center outward - this provides edge data for the shader
+    const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2 - 10);
+    gradient.addColorStop(0, 'white');
+    gradient.addColorStop(0.5, 'white');
+    gradient.addColorStop(0.8, 'rgb(180, 180, 180)');
+    gradient.addColorStop(1, 'rgb(100, 100, 100)');
+    
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(size/2, size/2, size/2 - 10, 0, Math.PI * 2);
+    ctx.fill();
+    
+    return ctx.getImageData(0, 0, size, size);
+  }
+  createCircleImageData(color) {
+    const size = 128;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    
+    // Black background
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, size, size);
+    
+    // Draw multiple circles to ensure complete fill
+    ctx.fillStyle = 'white';
+    const centerX = size / 2;
+    const centerY = size / 2;
+    const radius = size / 2 - 4;
+    
+    // Fill the entire circle area with white pixels
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const dx = x - centerX;
+        const dy = y - centerY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance <= radius) {
+          ctx.fillRect(x, y, 1, 1);
+        }
+      }
+    }
+    
+    return ctx.getImageData(0, 0, size, size);
+  }
+  attachEventListeners() {
+    const navItems = this.container.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const pageId = item.getAttribute('data-page-id');
+        if (pageId) {
+          if (pageId === 'home' && typeof window.showHomePage === 'function') { window.showHomePage(); }
+          else if (typeof window.showPage === 'function') { window.showPage(pageId); }
         }
       });
     });
   }
-
   destroy() {
-    this.container.innerHTML = '';
+    this.metallicInstances.forEach(instance => instance.destroy());
+    this.metallicInstances = [];
   }
 }
-
-// Make CardNav available globally
 window.CardNav = CardNav;
